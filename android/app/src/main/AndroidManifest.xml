@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.spaniel">
+    package="lv.upg.spaniel">
    <application
         android:label="spaniel"
         android:name="${applicationName}"
