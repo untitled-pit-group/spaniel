@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:spaniel/l10n/l10n.dart';
+import 'package:spaniel/spaniel/screens/home.dart';
 
 void main() {
   runApp(const SpanielApp());
@@ -12,54 +14,13 @@ class SpanielApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'Spaniel',
+      title: "app_title".tr,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.orange,
       ),
-      home: const HomeView(),
-    );
-  }
-}
-
-class CounterController extends GetxController {
-  var count = 0.obs;
-  void increment() => count++;
-}
-
-class HomeView extends StatelessWidget {
-  const HomeView({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    // Some weird GetX magic that injects the controller inside this context
-    final counterController = Get.put(CounterController());
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("GetX counter test"),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            // How the fuck does GetX know to rebuild only when the counter changes
-            // and not just any observable? Does it even manage that? It should...
-            Obx(() => Text(
-                "${counterController.count}",
-                style: Theme.of(context).textTheme.headline4,
-              ),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: counterController.increment,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
+      locale: Get.deviceLocale,
+      translations: PifsLocalization(),
+      home: const SPHome(),
     );
   }
 }
