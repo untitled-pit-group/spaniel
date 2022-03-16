@@ -23,6 +23,8 @@ dependencies:
   bloc: ^8.0.3
   flutter_bloc: ^8.0.1
   get: ^4.6.1
+  dartz: ^0.10.1
+  json_rpc_2: ^3.0.1
 
 dev_dependencies:
   flutter_test:
