@@ -1,4 +1,4 @@
-import 'package:spaniel/pifs/objects/file.dart';
+import "package:spaniel/pifs/objects/file.dart";
 
 class PifsUploadsFinishResponse {
   // A [PifsFile] object, corresponding to the upload.

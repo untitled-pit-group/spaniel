@@ -1,4 +1,4 @@
-import 'package:collection/collection.dart';
+import "package:collection/collection.dart";
 
 typedef _PE = PifsError; // Shorthand
 

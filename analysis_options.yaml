@@ -18,8 +18,10 @@ linter:
     implementation_imports: true
     avoid_print: true
     prefer_single_quotes: false
+    prefer_double_quotes: true
 
 analyzer:
   errors:
+    prefer_double_quotes: warning
     avoid_print: error
     implementation_imports: error

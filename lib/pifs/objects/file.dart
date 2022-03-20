@@ -1,5 +1,5 @@
-import 'src/file_type.dart';
-import 'src/indexing_state.dart';
+import "src/file_type.dart";
+import "src/indexing_state.dart";
 
 class PifsFile {
   /// The file ID.

@@ -1,12 +1,12 @@
-import 'package:dartz/dartz.dart';
-import 'package:spaniel/pifs/error.dart';
-import 'package:spaniel/pifs/parameters/uploads_begin.dart';
-import 'package:spaniel/pifs/parameters/uploads_cancel.dart';
-import 'package:spaniel/pifs/parameters/uploads_finish.dart';
-import 'package:spaniel/pifs/responses/files_list.dart';
-import 'package:spaniel/pifs/responses/null_response.dart';
-import 'package:spaniel/pifs/responses/uploads_begin.dart';
-import 'package:spaniel/pifs/responses/uploads_finish.dart';
+import "package:dartz/dartz.dart";
+import "package:spaniel/pifs/error.dart";
+import "package:spaniel/pifs/parameters/uploads_begin.dart";
+import "package:spaniel/pifs/parameters/uploads_cancel.dart";
+import "package:spaniel/pifs/parameters/uploads_finish.dart";
+import "package:spaniel/pifs/responses/files_list.dart";
+import "package:spaniel/pifs/responses/null_response.dart";
+import "package:spaniel/pifs/responses/uploads_begin.dart";
+import "package:spaniel/pifs/responses/uploads_finish.dart";
 
 typedef PifsResponse<T> = Future<Either<T, PifsError>>;
 

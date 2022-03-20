@@ -1,4 +1,4 @@
-import 'package:spaniel/pifs/objects/file.dart';
+import "package:spaniel/pifs/objects/file.dart";
 
 class PifsFilesListResponse {
   final List<PifsFile> files;
