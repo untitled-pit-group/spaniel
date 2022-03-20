@@ -1,4 +1,4 @@
-import 'package:spaniel/pifs/support/json.dart';
+import "package:spaniel/pifs/support/json.dart";
 
 /// Represents an in-progress upload.
 class PifsUploadId {

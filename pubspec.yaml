@@ -27,6 +27,9 @@ dependencies:
   json_rpc_2: ^3.0.1
   http: ^0.13.4
   stream_channel: ^2.1.0
+  mocktail: ^0.3.0
+  list_ext: ^1.0.4
+  crypto: ^3.0.1
 
 dev_dependencies:
   flutter_test:

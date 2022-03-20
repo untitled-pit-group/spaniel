@@ -1,4 +1,4 @@
-import 'package:get/get.dart';
+import "package:get/get.dart";
 
 // Example for parameters
 /*
@@ -23,12 +23,18 @@ Text('logged_in'.trParams({
 class PifsLocalization extends Translations {
   @override
   Map<String, Map<String, String>> get keys => {
-    'lv_LV': {
-      'home_title': 'Diezgan neprātīga failu meklēšana',
+    "lv_LV": {
+      "home_title": "Diezgan neprātīga failu meklēšana",
     },
-    'en_US': {
-      'app_title': 'Pretty Insane File Search',
-      'home_title': 'Pretty Insane File Search',
+    "en_US": {
+      "app_title": "Pretty Insane File Search",
+      "home_title": "Pretty Insane File Search",
+      "my_files": "My files",
+      "name": "Name",
+      "download": "Download",
+      "upload": "Upload",
+      "upload.choose_file": "Choose a file to upload",
+      "search": "Search",
     },
   };
 }

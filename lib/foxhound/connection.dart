@@ -1,14 +1,13 @@
-import 'package:async/src/stream_sink_transformer.dart';
-import 'dart:async';
-import 'package:http/http.dart' as http;
-import 'package:spaniel/config.dart';
-import 'package:stream_channel/stream_channel.dart';
+import "dart:async";
+import "package:http/http.dart" as http;
+import "package:spaniel/config.dart";
+import "package:stream_channel/stream_channel.dart";
 
-class _FxConnectionSink implements StreamSink<String> {
+class _FXConnectionSink implements StreamSink<String> {
   final _done = Completer<void>();
-  final FxConnection _connection;
+  final FXConnection _connection;
 
-  _FxConnectionSink._(this._connection);
+  _FXConnectionSink._(this._connection);
 
   @override
   void add(String event) {
@@ -36,23 +35,23 @@ class _FxConnectionSink implements StreamSink<String> {
   Future get done => _done.future;
 }
 
-class FxConnection with StreamChannelMixin<String> implements StreamChannel<String> {
+class FXConnection with StreamChannelMixin<String> implements StreamChannel<String> {
   final _stream = StreamController<String>();
-  late final _FxConnectionSink _sink;
+  late final _FXConnectionSink _sink;
 
   final http.Client _connection;
   final String _secretKey;
   String _sessionKey;
 
-  FxConnection._(this._connection, this._secretKey, this._sessionKey) {
-    _sink = _FxConnectionSink._(this);
+  FXConnection._(this._connection, this._secretKey, this._sessionKey) {
+    _sink = _FXConnectionSink._(this);
   }
 
-  static Future<FxConnection> connect(http.Client connection, String secretKey) async {
+  static Future<FXConnection> connect(http.Client connection, String secretKey) async {
     var resp = await connection.post(Uri.parse(Config.fxEndpoint),
       headers: {/* TODO[pn] */}, body: secretKey);
     var sessionKey = resp.body;
-    return FxConnection._(connection, secretKey, sessionKey);
+    return FXConnection._(connection, secretKey, sessionKey);
   }
 
   void sendRequest(String request) {
