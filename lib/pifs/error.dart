@@ -1,5 +1,3 @@
-import "package:collection/collection.dart";
-
 typedef _PE = PifsError; // Shorthand
 
 /// Enum like class that stores all known PIFS errors, and can retrieve

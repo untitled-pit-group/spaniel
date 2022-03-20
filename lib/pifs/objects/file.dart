@@ -1,6 +1,9 @@
 import "src/file_type.dart";
 import "src/indexing_state.dart";
 
+export "src/file_type.dart";
+export "src/indexing_state.dart";
+
 class PifsFile {
   /// The file ID.
   final String id;

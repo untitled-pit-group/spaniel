@@ -29,6 +29,12 @@ class PifsLocalization extends Translations {
     "en_US": {
       "app_title": "Pretty Insane File Search",
       "home_title": "Pretty Insane File Search",
+      "my_files": "My files",
+      "name": "Name",
+      "download": "Download",
+      "upload": "Upload",
+      "upload.choose_file": "Choose a file to upload",
+      "search": "Search",
     },
   };
 }
