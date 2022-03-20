@@ -17,6 +17,7 @@ class SpanielApp extends StatelessWidget {
       title: "app_title".tr,
       theme: ThemeData(
         primarySwatch: Colors.orange,
+        brightness: Brightness.dark
       ),
       locale: Get.deviceLocale,
       translations: PifsLocalization(),
