@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import "package:get/get.dart";
-import "package:spaniel/pifs/objects/file.dart";
+import "package:spaniel/pifs/data/file.dart";
 
 class SPFileItem extends StatelessWidget {
   final PifsFile file;

@@ -1,6 +1,13 @@
-class PifsUploadsCancelParameters {
-  /// The upload ID, as returned by uploads.begin.
-  final String uploadId;
+import "package:spaniel/pifs/data/upload.dart";
+import "package:spaniel/pifs/support/json.dart";
 
-  const PifsUploadsCancelParameters(this.uploadId);
+class PifsUploadsCancelParameters implements Jsonable {
+  final PifsUploadId id;
+
+  const PifsUploadsCancelParameters(this.id);
+
+  @override
+  dynamic toJson() {
+    return {"id": id.raw};
+  }
 }

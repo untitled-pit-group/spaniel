@@ -1,4 +1,6 @@
-class PifsUploadsBeginParameters {
+import "package:spaniel/pifs/support/json.dart";
+
+class PifsUploadsBeginParameters implements Jsonable {
   /// The file's SHA-256 hash, in hex form.
   final String hash;
 
@@ -10,9 +12,10 @@ class PifsUploadsBeginParameters {
   /// to clients other than the requester which are interested in ongoing upload progress.
   final String name;
 
-  const PifsUploadsBeginParameters({
-    required this.hash,
-    required this.length,
-    required this.name
-  });
+  const PifsUploadsBeginParameters(this.hash, this.length, this.name);
+
+  @override
+  dynamic toJson() {
+    return {"hash": hash, "length": length, "name": name};
+  }
 }

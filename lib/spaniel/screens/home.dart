@@ -4,7 +4,7 @@ import "dart:math";
 import "package:flutter/material.dart";
 import "package:get/get.dart";
 import "package:list_ext/list_ext.dart";
-import "package:spaniel/pifs/objects/file.dart";
+import "package:spaniel/pifs/data/file.dart";
 import "package:crypto/crypto.dart";
 import "package:spaniel/spaniel/screens/upload.dart";
 import "package:spaniel/spaniel/widgets/file_item.dart";
