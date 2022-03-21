@@ -5,13 +5,13 @@ import "package:stream_channel/stream_channel.dart";
 
 class _FXConnectionSink implements StreamSink<String> {
   final _done = Completer<void>();
-  final FXConnection _connection;
+  final FXConnection connection;
 
-  _FXConnectionSink._(this._connection);
+  _FXConnectionSink._(this.connection);
 
   @override
   void add(String event) {
-    _connection.sendRequest(event);
+    connection.sendRequest(event);
   }
 
   @override
@@ -40,25 +40,31 @@ class FXConnection with StreamChannelMixin<String> implements StreamChannel<Stri
   late final _FXConnectionSink _sink;
 
   final http.Client _connection;
-  final String _secretKey;
-  String _sessionKey;
+  final String _sessionKey;
 
-  FXConnection._(this._connection, this._secretKey, this._sessionKey) {
+  static const _userAgent = "PIFS/version-undefined";
+
+  FXConnection._(this._connection, this._sessionKey) {
     _sink = _FXConnectionSink._(this);
   }
 
   static Future<FXConnection> connect(http.Client connection, String secretKey) async {
     var resp = await connection.post(Uri.parse(Config.fxEndpoint),
-      headers: {/* TODO[pn] */}, body: secretKey);
+      headers: {"User-Agent": _userAgent}, body: secretKey);
     var sessionKey = resp.body;
-    return FXConnection._(connection, secretKey, sessionKey);
+    return FXConnection._(connection, sessionKey);
   }
 
   void sendRequest(String request) {
     var uri = Uri.parse(Config.fxEndpoint).replace(path: "/rpc");
-    _connection.post(uri, headers: {/* TODO[pn] */}, body: request).then((response) {
-      _stream.add(response.body);
-    });
+    _connection
+      .post(uri, headers: {
+        "Authorization": "Bearer $_sessionKey",
+        "User-Agent": _userAgent,
+      }, body: request)
+      .then((response) {
+        _stream.add(response.body);
+      });
   }
 
   @override

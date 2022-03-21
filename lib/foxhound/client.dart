@@ -12,7 +12,7 @@ import "package:http/http.dart" as http;
 import "package:spaniel/pifs/support/json.dart";
 
 class FoxhoundClient implements PifsClient {
-  final jsonrpc.Client _connection;
+  jsonrpc.Client _connection;
   FoxhoundClient._(this._connection);
   static Future<FoxhoundClient> build() async {
     final conn = await FXConnection.connect(http.Client(), Config.fxSecretKey);
@@ -20,9 +20,24 @@ class FoxhoundClient implements PifsClient {
     return FoxhoundClient._(client);
   }
 
-  PifsResponse<T> _send<T>(String method, Jsonable params, T Function(dynamic) builder) {
-    return _connection.sendRequest(method, params.toJson())
-      .then((resp) => Left(builder(resp)), onError: (error) => Right(error));
+  PifsResponse<T> _send<T>(String method, Jsonable params, T Function(dynamic) builder,
+      {bool autoRetryOnTokenExpiry = true}) async {
+    try {
+      var response = await _connection.sendRequest(method, params.toJson());
+      return Left(response);
+    } on jsonrpc.RpcException catch (error) {
+      // Special case: if the response is a 2401, the session token has expired
+      // and should be renewed, after which the request should be tried again.
+      // To prevent infinite loops, this is only tried once.
+      if (error.code == PifsError.codeUnauthorized && autoRetryOnTokenExpiry) {
+        _connection.close();
+        final conn = await FXConnection.connect(http.Client(), Config.fxSecretKey);
+        _connection = jsonrpc.Client(conn);
+        return _send(method, params, builder, autoRetryOnTokenExpiry: false);
+      }
+
+      return Right(PifsError.fromRpc(error));
+    }
   }
 
   @override
