@@ -6,7 +6,7 @@ import "package:spaniel/pifs/client.dart";
 import "package:spaniel/pifs/data/file.dart";
 import "package:spaniel/pifs/data/upload.dart";
 import "package:spaniel/pifs/parameters/all.dart";
-import "package:spaniel/pifs/responses/all.dart";
+import "package:spaniel/pifs/parameters/files_edit.dart";
 import "package:http/http.dart" as http;
 import "package:spaniel/pifs/responses/null_response.dart";
 import "package:spaniel/pifs/support/json.dart";
@@ -56,6 +56,12 @@ class FoxhoundClient implements PifsClient {
   @override
   PifsResponse<List<PifsFile>> filesList() {
     // TODO: implement filesList
+    throw UnimplementedError();
+  }
+
+  @override
+  PifsResponse<PifsFile> filesEdit(PifsFilesEditParameters params) {
+    // TODO: implement filesEdit
     throw UnimplementedError();
   }
 }

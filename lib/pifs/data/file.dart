@@ -1,10 +1,12 @@
+import "package:equatable/equatable.dart";
+
 import "src/file_type.dart";
 import "src/indexing_state.dart";
 
 export "src/file_type.dart";
 export "src/indexing_state.dart";
 
-class PifsFile {
+class PifsFile with EquatableMixin {
   /// The file ID.
   final String id;
 
@@ -52,4 +54,7 @@ class PifsFile {
     required String type,
     required int indexingState
   }) : _type = type, _indexingState = indexingState;
+
+  // Equal IDs are enough to claim that two files are equal, right?
+  @override List<Object?> get props => [id];
 }
