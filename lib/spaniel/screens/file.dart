@@ -1,7 +1,10 @@
 import "package:flutter/material.dart";
 import "package:get/get.dart";
+import "package:spaniel/pifs/data/file.dart";
 import "package:spaniel/spaniel/bloc/file.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
+import "package:spaniel/spaniel/visual/datetime_formatter.dart";
+import "package:spaniel/spaniel/visual/file_type_visual.dart";
 
 /// A screen for displaying details about a specific file. Note that Flutter widgets don't really care
 /// about the context in which they are displayed, and if this stops making sense as a screen,
@@ -10,12 +13,39 @@ import "package:flutter_bloc/flutter_bloc.dart";
 class SPFile extends StatelessWidget {
   const SPFile({Key? key,}) : super(key: key);
 
-  Widget _getBody(BuildContext context) {
-    return Column(
-        children: [
-          Text("file.details_title".tr, style: Get.theme.textTheme.titleLarge),
+  Widget _getBody(BuildContext context, SPFileBlocState state) {
+    final typeVisual = fileTypeVisuals[state.file?.type] ?? fileTypeVisuals[PifsFileType.unknown]!;
+    final dateFormatter = SPReadableDateTimeFormatter();
 
-        ]
+    return Column(
+      children: [
+        Row(
+          children: [
+            Icon(typeVisual.icon, size: 48),
+            Column(
+              children: [
+                Text("file.details_title".tr, style: Get.theme.textTheme.titleLarge),
+                Text(typeVisual.name.tr, style: Get.theme.textTheme.labelMedium),
+                Wrap(
+                  children: [...?state.file?.tags.map((e) => Chip(label: Text(e)))],
+                )
+              ]
+            ),
+          ],
+        ),
+        Column(
+            children: [
+              Text("file.date_uploaded".tr, style: Get.theme.textTheme.titleSmall),
+              Text(dateFormatter.format(state.file?.uploadTimestamp ?? DateTime.now()), style: Get.theme.textTheme.labelMedium),
+            ]
+        ),
+        Column(
+            children: [
+              Text("file.date_relevant".tr, style: Get.theme.textTheme.titleSmall),
+              Text(dateFormatter.format(state.file?.relevanceTimestamp ?? DateTime.now()), style: Get.theme.textTheme.labelMedium),
+            ]
+        ),
+      ],
     );
   }
 
@@ -35,10 +65,12 @@ class SPFile extends StatelessWidget {
       appBar: AppBar(
           title: Text(BlocProvider.of<SPFileBloc>(context).state.file?.name ?? "file.no_file".tr)
       ),
-      body: BlocBuilder<SPFileBloc, SPFileBlocState>(
-        builder: (context, state) {
-          return _getBody(context);
-        }
+      body: SingleChildScrollView(
+        child: BlocBuilder<SPFileBloc, SPFileBlocState>(
+          builder: (context, state) {
+            return _getBody(context, state);
+          }
+        ),
       ),
     );
   }

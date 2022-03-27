@@ -1,7 +1,11 @@
 import "package:flutter/material.dart";
 import "package:get/get.dart";
 import "package:spaniel/l10n/l10n.dart";
+import "package:spaniel/pifs/client.dart";
+import "package:spaniel/pifs/fakes/fake_client.dart";
 import "package:spaniel/spaniel/screens/home.dart";
+
+import "package:spaniel/foxhound/client.dart";
 
 void main() {
   runApp(const SpanielApp());
@@ -21,7 +25,12 @@ class SpanielApp extends StatelessWidget {
       ),
       locale: Get.deviceLocale,
       translations: PifsLocalization(),
-      home: const SPHome(),
+      home: Builder(
+        builder: (context) {
+          Get.putAsync<PifsClient>(PifsFakeClient.build);
+          return const SPHome();
+        }
+      ),
     );
   }
 }
