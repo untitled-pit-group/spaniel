@@ -17,7 +17,7 @@ class PifsUpload {
       final url = j.vt("upload_url", Uri.tryParse);
       return PifsUpload(PifsUploadId(id), url);
     } else {
-      throw JsonRepresentationException.notAMap(json);
+      throw JsonRepresentationException.invalidShape(json);
     }
   }
 }

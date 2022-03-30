@@ -119,7 +119,7 @@ class PifsFile with EquatableMixin {
         indexingState: indexingState,
       );
     } else {
-      throw JsonRepresentationException.notAMap(json);
+      throw JsonRepresentationException.invalidShape(json);
     }
   }
 }

@@ -11,6 +11,33 @@ import "package:spaniel/pifs/responses/responses.dart";
 import "package:http/http.dart" as http;
 import "package:spaniel/pifs/support/json.dart";
 
+/// This class always serializes to an empty map. The const instance at [instance]
+/// should be used to prevent needless instantiation.
+class _EmptyParameters implements Jsonable {
+  const _EmptyParameters();
+  static const instance = _EmptyParameters();
+
+  @override
+  toJson() => const <String, dynamic>{};
+}
+
+/// Helper class to generate typesafe bound [fromJson] constructors for arbitrary
+/// list types, instead of modifying the [List] type itself. Instantiations of this
+/// class should be performable at AOT compilation stage, and runtime bloat should
+/// be minimal due to the const-ness throughout.
+class _ListBuilder<Elem> {
+  final Elem Function(dynamic) builder;
+  const _ListBuilder(this.builder);
+
+  List<Elem> fromJson(dynamic json) {
+    if (json is List<dynamic>) {
+      return json.map((elem) => builder(elem)).toList(growable: false);
+    } else {
+      throw JsonRepresentationException.invalidShape(json);
+    }
+  }
+}
+
 class FoxhoundClient implements PifsClient {
   jsonrpc.Client _connection;
   FoxhoundClient._(this._connection);
@@ -59,13 +86,12 @@ class FoxhoundClient implements PifsClient {
 
   @override
   PifsResponse<List<PifsFile>> filesList() {
-    // TODO: implement filesList
-    throw UnimplementedError();
+    return _send("files.list", _EmptyParameters.instance,
+      const _ListBuilder(PifsFile.fromJson).fromJson);
   }
 
   @override
   PifsResponse<PifsFile> filesEdit(PifsFilesEditParameters params) {
-    // TODO: implement filesEdit
-    throw UnimplementedError();
+    return _send("files.edit", params, PifsFile.fromJson);
   }
 }
