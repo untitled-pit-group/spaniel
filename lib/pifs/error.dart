@@ -41,11 +41,56 @@ class PifsError {
   static const codeConflict = 2409;
   static const codeInternalServerError = 2500;
 
-  factory PifsError.fromRpc(RpcException exc) => PifsError._(exc.code,
-    _readableCodes[exc.code] ?? "unknown", exc.message, exc.data);
+  factory PifsError.fromRpc(RpcException exc) {
+    if (exc.code == codeInternalServerError &&
+        exc.data is Map<String, dynamic> &&
+        exc.data["exception"] != null) {
+      return PifsRemoteError.fromRpc(exc);
+    }
+    return PifsError._(exc.code,
+      _readableCodes[exc.code] ?? "unknown", exc.message, exc.data);
+  }
 
   static _PE fromCode(int code) {
     final readableCode = _readableCodes[code];
     return _PE._(code, readableCode ?? "unknown");
+  }
+}
+
+/// A representation of an exception that happened within the server. This can
+/// only be returned if the server itself is not in production mode.
+class PifsRemoteError extends PifsError {
+  final String remoteClass;
+  final String? remoteMessage;
+  final String remoteLocation;
+  final List<String> remoteTrace;
+
+  PifsRemoteError._({
+    required int code,
+    required String readableCode,
+    required String serverMessage,
+    required dynamic data,
+    required this.remoteClass,
+    required this.remoteMessage,
+    required this.remoteLocation,
+    required this.remoteTrace,
+  }) : super._(code, readableCode, serverMessage, data);
+
+  factory PifsRemoteError.fromRpc(RpcException exc) {
+    Map<String, dynamic> data = exc.data;
+    var exception = data["exception"];
+    var message = data["message"];
+    var location = data["location"];
+    var trace = (data["trace"] as String).split("\n");
+    return PifsRemoteError._(
+      code: exc.code,
+      readableCode: PifsError._readableCodes[exc.code] ?? "unknown",
+      serverMessage: exc.message,
+      data: data,
+      remoteClass: exception,
+      remoteMessage: message,
+      remoteLocation: location,
+      remoteTrace: trace,
+    );
   }
 }
