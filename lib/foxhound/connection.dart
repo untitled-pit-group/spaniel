@@ -49,9 +49,9 @@ class FXConnection with StreamChannelMixin<String> implements StreamChannel<Stri
   }
 
   static Future<FXConnection> connect(http.Client connection, String secretKey) async {
-    var resp = await connection.post(Uri.parse(Config.fxEndpoint),
+    var resp = await connection.post(Uri.parse(Config.fxEndpoint).replace(path: "/auth-token"),
       headers: {"User-Agent": _userAgent}, body: secretKey);
-    var sessionKey = resp.body;
+    var sessionKey = resp.body.trimRight();
     return FXConnection._(connection, sessionKey);
   }
 
@@ -60,6 +60,7 @@ class FXConnection with StreamChannelMixin<String> implements StreamChannel<Stri
     _connection
       .post(uri, headers: {
         "Authorization": "Bearer $_sessionKey",
+        "Content-Type": "application/json; charset=UTF-8",
         "User-Agent": _userAgent,
       }, body: request)
       .then((response) {

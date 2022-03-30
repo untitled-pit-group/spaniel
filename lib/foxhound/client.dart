@@ -17,6 +17,7 @@ class FoxhoundClient implements PifsClient {
   static Future<FoxhoundClient> build() async {
     final conn = await FXConnection.connect(http.Client(), Config.fxSecretKey);
     final client = jsonrpc.Client(conn);
+    client.listen();
     return FoxhoundClient._(client);
   }
 
@@ -33,6 +34,7 @@ class FoxhoundClient implements PifsClient {
         _connection.close();
         final conn = await FXConnection.connect(http.Client(), Config.fxSecretKey);
         _connection = jsonrpc.Client(conn);
+        _connection.listen();
         return _send(method, params, builder, autoRetryOnTokenExpiry: false);
       }
 

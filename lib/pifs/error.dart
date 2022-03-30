@@ -3,8 +3,6 @@ import "package:json_rpc_2/error_code.dart" as error_code;
 
 typedef _PE = PifsError; // Shorthand
 
-/// Enum like class that stores all known PIFS errors, and can retrieve
-/// an error by code.
 class PifsError {
   final String readableCode;
   final int code;
@@ -30,6 +28,7 @@ class PifsError {
     codeUnauthorized: "unauthorized",
     codeNotFound: "not_found",
     codeConflict: "conflict",
+    codeInternalServerError: "internal_server_error",
   };
 
   static const codeInvalidParams = error_code.INVALID_PARAMS;
@@ -40,6 +39,7 @@ class PifsError {
   static const codeUnauthorized = 2401;
   static const codeNotFound = 2404;
   static const codeConflict = 2409;
+  static const codeInternalServerError = 2500;
 
   factory PifsError.fromRpc(RpcException exc) => PifsError._(exc.code,
     _readableCodes[exc.code] ?? "unknown", exc.message, exc.data);
