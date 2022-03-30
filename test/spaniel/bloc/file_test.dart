@@ -18,7 +18,7 @@ void main() {
       relevanceTimestamp: DateTime.fromMillisecondsSinceEpoch(0),
       length: 69,
       hash: "test",
-      type: "test",
+      type: "plain",
       indexingState: 0
   );
 
