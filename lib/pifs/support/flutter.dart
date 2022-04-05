@@ -2,7 +2,7 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:spaniel/foxhound/client.dart";
 import "package:spaniel/pifs/client.dart";
-import "package:spaniel/pifs/fakes/fake_client.dart";
+import "package:spaniel/pifs/fakes/mock_client.dart";
 import "package:spaniel/pifs/fakes/offline_client.dart";
 
 class PifsClientProvider extends InheritedWidget {
@@ -69,12 +69,12 @@ class PifsFoxhoundClientConnector extends StatefulWidget {
   State<PifsFoxhoundClientConnector> createState() => _PifsClientConnectorState();
 }
 
-class PifsFakeClientConnector extends StatelessWidget {
+class PifsMockClientConnector extends StatelessWidget {
   final Widget child;
-  const PifsFakeClientConnector({Key? key, required this.child}) : super(key: key);
+  const PifsMockClientConnector({Key? key, required this.child}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return PifsClientProvider(client: PifsFakeClient.instance, child: child);
+    return PifsClientProvider(client: PifsMockClient.instance, child: child);
   }
 }
