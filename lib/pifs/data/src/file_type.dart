@@ -1,5 +1,5 @@
 enum PifsFileType {
-  unknown, document, plain, media
+  document, plain, media
 }
 
 class PifsFileTypeHelper {
@@ -8,7 +8,16 @@ class PifsFileTypeHelper {
       case "document": return PifsFileType.document;
       case "plain": return PifsFileType.plain;
       case "media": return PifsFileType.media;
-      default: return PifsFileType.unknown;
+      default: throw ArgumentError.value(type, "type");
+    }
+  }
+
+  static bool isValid(String type) {
+    try {
+      getFromString(type);
+      return true;
+    } on ArgumentError {
+      return false;
     }
   }
 }

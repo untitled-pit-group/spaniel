@@ -1,6 +1,9 @@
-class PifsUploadsFinishParameters {
+import "package:spaniel/pifs/data/upload.dart";
+import "package:spaniel/pifs/support/json.dart";
+
+class PifsUploadsFinishParameters implements Jsonable {
   /// The upload ID, as returned by uploads.begin.
-  final String uploadId;
+  final PifsUploadId uploadId;
 
   /// The file's name, as provided by the filesystem or set by the user
   /// interim uploads.begin and now.
@@ -18,4 +21,14 @@ class PifsUploadsFinishParameters {
     required this.tags,
     this.relevanceTimestamp
   });
+
+  @override
+  toJson() {
+    return <String, dynamic>{
+      "upload_id": uploadId.raw,
+      "name": name,
+      "tags": tags,
+      "relevance_timestamp": relevanceTimestamp?.toIso8601String(),
+    };
+  } 
 }

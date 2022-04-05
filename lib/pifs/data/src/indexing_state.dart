@@ -1,5 +1,4 @@
 enum PifsIndexingState {
-  unknown,
   /// The file is in queue waiting to be indexed.
   waitingForProcessing,
   /// The file is being parsed to extract its contents.
@@ -17,15 +16,38 @@ enum PifsIndexingState {
 }
 
 class PifsIndexingStateHelper {
+  static const codeWaitingForProcessing = 0;
+  static const codeParsing = 1;
+  static const codePendingTranscription = 2;
+  static const codePendingIndexing = 3;
+  static const codeIndexed = 4;
+  static const codeError = -1;
+
   static PifsIndexingState getFromInt(int state) {
     switch(state) {
-      case 0: return PifsIndexingState.waitingForProcessing;
-      case 1: return PifsIndexingState.parsing;
-      case 2: return PifsIndexingState.pendingTranscription;
-      case 3: return PifsIndexingState.pendingIndexing;
-      case 4: return PifsIndexingState.indexed;
-      case -1: return PifsIndexingState.error;
-      default: return PifsIndexingState.unknown;
+      case codeWaitingForProcessing:
+        return PifsIndexingState.waitingForProcessing;
+      case codeParsing:
+        return PifsIndexingState.parsing;
+      case codePendingTranscription:
+        return PifsIndexingState.pendingTranscription;
+      case codePendingIndexing:
+        return PifsIndexingState.pendingIndexing;
+      case codeIndexed:
+        return PifsIndexingState.indexed;
+      case codeError:
+        return PifsIndexingState.error;
+      default:
+        throw ArgumentError.value(state, "state");
+    }
+  }
+
+  static bool isValid(int state) {
+    try {
+      getFromInt(state);
+      return true;
+    } on ArgumentError {
+      return false;
     }
   }
 }
