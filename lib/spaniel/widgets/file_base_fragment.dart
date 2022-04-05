@@ -5,18 +5,16 @@ import 'package:spaniel/spaniel/visual/datetime_formatter.dart';
 class SPFileBaseFragment extends StatelessWidget {
   final PifsFile file;
   final bool showDates;
+  final bool isEditing;
+  final TextEditingController titleEditController;
 
   const SPFileBaseFragment({
     required this.file,
+    required this.titleEditController,
     this.showDates = true,
+    this.isEditing = false,
     Key? key
   }) : super(key: key);
-
-  Widget _getTagDisplay(BuildContext context) {
-    return Wrap(
-      children: [...file.tags.map((e) => Chip(label: Text(e)))],
-    );
-  }
 
   Widget _getFileIcon(BuildContext context) {
     IconData? iconData;
@@ -40,6 +38,15 @@ class SPFileBaseFragment extends StatelessWidget {
   }
 
   Widget _getTitle(BuildContext context) {
+    if(isEditing) {
+      return TextField(
+        decoration: const InputDecoration(
+          isDense: true
+        ),
+        controller: titleEditController,
+      );
+    }
+
     return Text(file.name,
         style: Theme.of(context).textTheme.titleLarge
     );
@@ -116,7 +123,7 @@ class SPFileBaseFragment extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _getTitle(context),
-                  _getSubtitle(context)
+                  if (!isEditing) _getSubtitle(context)
                 ],
               ),
               ),
@@ -124,7 +131,6 @@ class SPFileBaseFragment extends StatelessWidget {
             _getFileIcon(context)
           ],
         ),
-        _getTagDisplay(context)
       ],
     );
   }

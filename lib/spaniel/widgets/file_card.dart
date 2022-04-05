@@ -15,7 +15,16 @@ class SPFileCard extends StatefulWidget {
 }
 
 class _SPFileCardState extends State<SPFileCard> {
+  TextEditingController titleController = TextEditingController();
   bool isExpanded = false;
+  bool isEditing = false;
+
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    titleController.text = widget.file.state.file?.name ?? "";
+  }
 
   Widget _getCardContents(BuildContext context, SPFileBlocState state) {
     if(state.file == null) {
@@ -31,12 +40,19 @@ class _SPFileCardState extends State<SPFileCard> {
 
     return Column(
       children: [
-        SPFileBaseFragment(file: state.file!, showDates: !isExpanded),
-        if(isExpanded) SPFileExtendedFragment(
+        SPFileBaseFragment(
+          file: state.file!,
+          showDates: !isExpanded,
+          isEditing: isEditing,
+          titleEditController: titleController,
+        ),
+        SPFileExtendedFragment(
           file: state.file!,
           onDelete: () => widget.file.add(SPFileBlocDelete()),
-          onEdit: () => print("Edit"),
-          onDownload: () => print("Download")
+          onEdit: () => setState(() => isEditing = !isEditing),
+          onDownload: () => print("Download"),
+          isExpanded: isExpanded,
+          isEditing: isEditing,
         )
       ],
     );
@@ -46,11 +62,21 @@ class _SPFileCardState extends State<SPFileCard> {
   Widget build(BuildContext context) {
     return Card(
       child: InkWell(
-        onTap: () => setState(() => isExpanded = !isExpanded),
+        onTap: () => setState(() {
+          if(isEditing) return;
+          isExpanded = !isExpanded;
+        }),
         child: Padding(
           padding: const EdgeInsets.all(8),
-          child: BlocBuilder<SPFileBloc, SPFileBlocState>(
+          child: BlocConsumer<SPFileBloc, SPFileBlocState>(
             bloc: widget.file,
+            listenWhen: (previous, current) {
+              if(previous.file != current.file) {
+                titleController.text = current.file?.name ?? "";
+              }
+              return false;
+            },
+            listener: (_, __) {},
             builder: (context, state) {
               return AnimatedSize(
                 alignment: Alignment.topCenter,
