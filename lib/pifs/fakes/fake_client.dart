@@ -30,11 +30,6 @@ class PifsFakeClient implements PifsClient {
   );
   }
 
-  static Future<PifsFakeClient> build() async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    return PifsFakeClient();
-  }
-
   const PifsFakeClient();
   static const instance = PifsFakeClient();
 

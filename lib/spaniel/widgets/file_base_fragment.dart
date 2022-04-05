@@ -1,10 +1,10 @@
 import "package:flutter/material.dart";
 import "package:spaniel/pifs/data/file.dart";
 
-class SPFileItem extends StatelessWidget {
+class SPFileBaseFragment extends StatelessWidget {
   final PifsFile file;
 
-  const SPFileItem({
+  const SPFileBaseFragment({
     required this.file,
     Key? key
   }) : super(key: key);
@@ -37,26 +37,21 @@ class SPFileItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
+    return Row(
+      children: [
+        Expanded(child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Expanded(child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(file.name,
-                  style: Theme.of(context).textTheme.titleLarge
-                ),
-                Text(file.uploadTimestamp.toString(),
-                    style: Theme.of(context).textTheme.bodySmall
-                ),
-              ],
-            )),
-            _getFileIcon(context)
+            Text(file.name,
+              style: Theme.of(context).textTheme.titleLarge
+            ),
+            Text(file.uploadTimestamp.toString(),
+                style: Theme.of(context).textTheme.bodySmall
+            ),
           ],
-        ),
-      ),
+        )),
+        _getFileIcon(context)
+      ],
     );
   }
 }
