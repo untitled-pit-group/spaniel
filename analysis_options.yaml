@@ -22,6 +22,5 @@ linter:
 
 analyzer:
   errors:
-    prefer_double_quotes: warning
     avoid_print: error
     implementation_imports: error
