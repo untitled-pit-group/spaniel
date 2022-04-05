@@ -6,20 +6,18 @@ import "package:list_ext/list_ext.dart";
 import "package:spaniel/pifs/client.dart";
 import "package:spaniel/pifs/data/file.dart";
 import "package:spaniel/pifs/data/upload.dart";
-import "package:spaniel/pifs/parameters/files_edit.dart";
-import "package:spaniel/pifs/parameters/uploads_begin.dart";
-import "package:spaniel/pifs/parameters/uploads_cancel.dart";
-import "package:spaniel/pifs/parameters/uploads_finish.dart";
-import "package:spaniel/pifs/responses/null_response.dart";
+import "package:spaniel/pifs/parameters/parameters.dart";
+import "package:spaniel/pifs/responses/responses.dart";
 
 class PifsFakeClient implements PifsClient {
   static const _chars = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890";
-  final Random _rnd = Random();
 
   String getRandomString(int length) => String.fromCharCodes(Iterable.generate(
-      length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
+      length, (_) => _chars.codeUnitAt(Random().nextInt(_chars.length))));
 
-  PifsFile _generateFakeFile() => PifsFile(
+  PifsFile _generateFakeFile() {
+    final Random _rnd = Random();
+    return PifsFile(
       id: getRandomString(16),
       name: getRandomString(16),
       tags: ["Iyama Tag", "Birka", "Kakas Emodži", "💩"].where((_) => _rnd.nextBool()).toList(),
@@ -30,11 +28,15 @@ class PifsFakeClient implements PifsClient {
       type: ["document", "plain", "media"].random,
       indexingState: _rnd.nextInt(5)
   );
+  }
 
   static Future<PifsFakeClient> build() async {
     await Future.delayed(const Duration(milliseconds: 500));
     return PifsFakeClient();
   }
+
+  const PifsFakeClient();
+  static const instance = PifsFakeClient();
 
   @override
   PifsResponse<PifsFile> filesEdit(PifsFilesEditParameters params) {

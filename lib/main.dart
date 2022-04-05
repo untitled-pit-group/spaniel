@@ -1,10 +1,8 @@
 import "package:flutter/material.dart";
 import "package:spaniel/generated/l10n.dart";
-import "package:spaniel/pifs/client.dart";
-import "package:spaniel/pifs/fakes/fake_client.dart";
 import "package:spaniel/spaniel/screens/home.dart";
 import "package:flutter_localizations/flutter_localizations.dart";
-import "package:spaniel/foxhound/client.dart";
+import "package:spaniel/pifs/support/flutter.dart";
 
 void main() {
   runApp(const SpanielApp());
@@ -28,7 +26,7 @@ class SpanielApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: S.delegate.supportedLocales,
-      home: const SPHome()
+      home: const PifsFoxhoundClientConnector(child: SPHome())
     );
   }
 }

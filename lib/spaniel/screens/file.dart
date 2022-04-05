@@ -13,7 +13,7 @@ class SPFile extends StatelessWidget {
   const SPFile({Key? key,}) : super(key: key);
 
   Widget _getBody(BuildContext context, SPFileBlocState state) {
-    final typeVisual = fileTypeVisuals[state.file?.type] ?? fileTypeVisuals[PifsFileType.unknown]!;
+    final typeVisual = fileTypeVisuals[state.file?.type]!;
     final dateFormatter = SPReadableDateTimeFormatter();
 
     return Column(

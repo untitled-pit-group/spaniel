@@ -17,8 +17,6 @@ linter:
     flutter_style_todos: false
     implementation_imports: true
     avoid_print: true
-    prefer_single_quotes: false
-    prefer_double_quotes: true
 
 analyzer:
   errors:

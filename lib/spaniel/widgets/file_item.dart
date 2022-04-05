@@ -18,9 +18,6 @@ class SPFileItem extends StatelessWidget {
     IconData? iconData;
 
     switch(file.type) {
-      case PifsFileType.unknown:
-        iconData = Icons.question_mark;
-        break;
       case PifsFileType.document:
         iconData = Icons.description;
         break;
