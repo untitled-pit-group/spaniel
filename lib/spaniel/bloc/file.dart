@@ -40,6 +40,9 @@ class SPFileBlocSetModifiedRelevanceDate implements SPFileBlocEvent {
 class SPFileBlocSaveChanges implements SPFileBlocEvent {}
 
 class SPFileBlocState extends Equatable {
+  /// If [true], the file is busy and new events should not be added
+  final bool isBusy;
+
   /// If [null], file is assumed to be deleted, or no file is selected.
   final PifsFile? file;
 
@@ -47,12 +50,14 @@ class SPFileBlocState extends Equatable {
   final PifsFileStagedMetadata stagedMetadata;
 
   const SPFileBlocState._internal({
+    required this.isBusy,
     required this.file,
     required this.stagedMetadata
   });
 
   factory SPFileBlocState.initial(PifsFile? file) {
     return SPFileBlocState._internal(
+      isBusy: false,
       file: file,
       stagedMetadata: PifsFileStagedMetadata.initial(file)
     );
@@ -64,12 +69,21 @@ class SPFileBlocState extends Equatable {
 
   SPFileBlocState withStagedMetadata(PifsFileStagedMetadata stagedMetadata) {
     return SPFileBlocState._internal(
+      isBusy: isBusy,
       file: file,
       stagedMetadata: stagedMetadata
     );
   }
 
-  @override List<Object?> get props => [file];
+  SPFileBlocState withBusy(bool isBusy) {
+    return SPFileBlocState._internal(
+        isBusy: isBusy,
+        file: file,
+        stagedMetadata: stagedMetadata
+    );
+  }
+
+  @override List<Object?> get props => [file, isBusy, stagedMetadata];
 }
 
 /// The File Bloc provides a interface through which UI logic interacts with a file
@@ -77,8 +91,11 @@ class SPFileBlocState extends Equatable {
 class SPFileBloc extends Bloc<SPFileBlocEvent, SPFileBlocState> {
   final PifsClient client;
 
+  final Function(SPFileBloc)? onDelete;
+
   SPFileBloc(SPFileBlocState initialState, {
-    required this.client
+    required this.client,
+    this.onDelete,
   }) : super(initialState) {
     on<SPFileBlocDownload>(_onDownload);
     on<SPFileBlocDelete>(_onDelete);
@@ -95,7 +112,10 @@ class SPFileBloc extends Bloc<SPFileBlocEvent, SPFileBlocState> {
 
   Future<void> _onDelete(SPFileBlocDelete event, Emitter emit) async {
     /// TODO: Don't touch this until we can provide interface for delete
-    throw UnimplementedError();
+    emit(state.withBusy(true));
+    await Future.delayed(const Duration(milliseconds: 200));
+    onDelete?.call(this);
+    emit(state.withFile(null));
   }
 
   Future<void> _onSaveChanges(SPFileBlocSaveChanges event, Emitter emit) async {

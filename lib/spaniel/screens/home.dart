@@ -16,7 +16,9 @@ class SPHome extends StatelessWidget {
         return ListView(
             children: [
               Text("my_files", style: Theme.of(context).textTheme.headlineLarge),
-              ...state.files.map((e) => SPFileCard(e))
+              // Key is required for Flutter to not do weirdness and give
+              // the state of the current widget to a different one
+              ...state.files.map((e) => SPFileCard(e, key: e.state.file?.id != null ? Key(e.state.file!.id) : null))
             ]
         );
       }

@@ -7,6 +7,11 @@ abstract class SPFileListEvent {}
 
 class SPFileListReload implements SPFileListEvent {}
 
+class SPFileListRemove implements SPFileListEvent {
+  final SPFileBloc file;
+  SPFileListRemove(this.file);
+}
+
 class SPFileListState with EquatableMixin {
   final bool isBusy;
   final List<SPFileBloc> files;
@@ -47,6 +52,14 @@ class SPFileListState with EquatableMixin {
     );
   }
 
+  SPFileListState withRemovedFile(SPFileBloc file) {
+    return SPFileListState._internal(
+        isBusy: isBusy,
+        files: files..remove(file),
+        stateIdx: stateIdx + 1
+    );
+  }
+
   @override List<Object?> get props => [isBusy, stateIdx, files];
 }
 
@@ -57,13 +70,18 @@ class SPFileList extends Bloc<SPFileListEvent, SPFileListState> {
     required this.client
   }) : super(SPFileListState.initial()) {
     on<SPFileListReload>(_onReloadFiles);
+    on<SPFileListRemove>((event, emit) => emit(state.withRemovedFile(event.file)));
   }
 
   Future<void> _onReloadFiles(SPFileListReload event, Emitter emit) async {
     emit(state.withBusy(true));
     final files = await client.filesList();
     emit(state.withFiles(files.fold(
-      (result) => result.map((f) => SPFileBloc(SPFileBlocState.initial(f), client: client)).toList(),
+      (result) => result.map((f) => SPFileBloc(
+        SPFileBlocState.initial(f),
+        client: client,
+        onDelete: (file) => add(SPFileListRemove(file))
+      )).toList(),
       (error) => [],
     )).withBusy(false));
   }

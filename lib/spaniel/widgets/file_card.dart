@@ -21,12 +21,20 @@ class _SPFileCardState extends State<SPFileCard> {
     if(state.file == null) {
       return const Icon(Icons.mood_bad);
     }
+
+    if(state.isBusy) {
+      return const Padding(
+        padding: EdgeInsets.all(20),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Column(
       children: [
         SPFileBaseFragment(file: state.file!, showDates: !isExpanded),
         if(isExpanded) SPFileExtendedFragment(
           file: state.file!,
-          onDelete: () => print("Delete"),
+          onDelete: () => widget.file.add(SPFileBlocDelete()),
           onEdit: () => print("Edit"),
           onDownload: () => print("Download")
         )
