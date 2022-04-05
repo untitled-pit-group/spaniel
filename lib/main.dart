@@ -31,7 +31,7 @@ class SpanielApp extends StatelessWidget {
       supportedLocales: S.delegate.supportedLocales,
       home: PifsFakeClientConnector(child: Builder(
         builder: (context) {
-          final client = PifsClientProvider.of(context);
+          final client = PifsClientProvider.of(context).client;
           if(client is PifsIndeterminateClient) {
             return const Center(
               child: CircularProgressIndicator(),
