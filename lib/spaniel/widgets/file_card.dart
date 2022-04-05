@@ -48,7 +48,29 @@ class _SPFileCardState extends State<SPFileCard> {
         ),
         SPFileExtendedFragment(
           file: state.file!,
-          onDelete: () => widget.file.add(SPFileBlocDelete()),
+          onDelete: () {
+            showDialog(context: context, builder: (context) {
+              return AlertDialog(
+                title: const Text("Delete file"),
+                content: Text("Are you sure you want to delete ${state.file!.name}?"),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text("Cancel")
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      widget.file.add(SPFileBlocDelete());
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text("Delete")
+                  )
+                ],
+              );
+            });
+          },
           onEdit: () => setState(() => isEditing = !isEditing),
           onDownload: () => print("Download"),
           isExpanded: isExpanded,
