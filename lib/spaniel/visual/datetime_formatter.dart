@@ -7,8 +7,10 @@ abstract class SPDateTimeFormatter {
 class SPReadableDateTimeFormatter implements SPDateTimeFormatter {
   static final formatter = DateFormat.yMMMd();
 
+  const SPReadableDateTimeFormatter();
+
   @override
-  String format(DateTime dateTime) {
-    return formatter.format(dateTime);
+  String format(DateTime? dateTime) {
+    return dateTime != null ? formatter.format(dateTime) : "-";
   }
 }

@@ -13,8 +13,7 @@ class SPHome extends StatelessWidget {
         if(state.isBusy) {
           return const Center(child: CircularProgressIndicator());
         }
-        return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+        return ListView(
             children: [
               Text("my_files", style: Theme.of(context).textTheme.headlineLarge),
               ...state.files.map((e) => SPFileCard(e))
@@ -25,18 +24,11 @@ class SPHome extends StatelessWidget {
   }
 
   Widget _getContents(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _getFileList(context)
-      ],
-    );
+    return _getFileList(context);
   }
 
   Widget _getBody(BuildContext context) {
-    return SingleChildScrollView(
-      child: _getContents(context)
-    );
+    return _getContents(context);
   }
 
   @override

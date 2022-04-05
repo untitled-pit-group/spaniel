@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spaniel/spaniel/bloc/file.dart';
 import 'package:spaniel/spaniel/widgets/file_base_fragment.dart';
+import 'package:spaniel/spaniel/widgets/file_extended_fragment.dart';
 
 class SPFileCard extends StatefulWidget {
   final SPFileBloc file;
@@ -22,8 +23,13 @@ class _SPFileCardState extends State<SPFileCard> {
     }
     return Column(
       children: [
-        SPFileBaseFragment(file: state.file!),
-        if(isExpanded) SPFileBaseFragment(file: state.file!)
+        SPFileBaseFragment(file: state.file!, showDates: !isExpanded),
+        if(isExpanded) SPFileExtendedFragment(
+          file: state.file!,
+          onDelete: () => print("Delete"),
+          onEdit: () => print("Edit"),
+          onDownload: () => print("Download")
+        )
       ],
     );
   }
@@ -40,8 +46,8 @@ class _SPFileCardState extends State<SPFileCard> {
             builder: (context, state) {
               return AnimatedSize(
                 alignment: Alignment.topCenter,
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeInOutCirc,
+                duration: const Duration(milliseconds: 350),
+                curve: Curves.easeInOutCubicEmphasized,
                 child: _getCardContents(context, state)
               );
             },

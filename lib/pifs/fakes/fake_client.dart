@@ -20,13 +20,13 @@ class PifsFakeClient implements PifsClient {
     return PifsFile(
       id: getRandomString(16),
       name: getRandomString(16),
-      tags: ["Iyama Tag", "Birka", "Kakas Emodži", "💩"].where((_) => _rnd.nextBool()).toList(),
+      tags: ["Iyama Tag", "Birka", "Kakas Emodži", "💩", "asdasd", "Baba", "Booey", "A really long tag that should cause the UI to act weird like overflow and shit"].where((_) => _rnd.nextBool()).toList(),
       uploadTimestamp: DateTime.now().subtract(Duration(hours: _rnd.nextInt(5000))),
       relevanceTimestamp: _rnd.nextBool() ? DateTime.now().subtract(Duration(hours: _rnd.nextInt(5000))) : null,
       length: _rnd.nextInt(500000),
       hash: sha256.convert(utf8.encode(getRandomString(20))).toString(),
       type: ["document", "plain", "media"].random,
-      indexingState: _rnd.nextInt(5)
+      indexingState: -1 + _rnd.nextInt(6)
   );
   }
 
@@ -41,7 +41,7 @@ class PifsFakeClient implements PifsClient {
   @override
   PifsResponse<List<PifsFile>> filesList() async {
     await Future.delayed(const Duration(milliseconds: 200));
-    return Left(List.generate(20, (_) => _generateFakeFile()));
+    return Left(List.generate(30, (_) => _generateFakeFile()));
   }
 
   @override
