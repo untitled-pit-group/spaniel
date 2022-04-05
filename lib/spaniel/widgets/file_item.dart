@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import "package:get/get.dart";
 import "package:spaniel/pifs/data/file.dart";
 
 class SPFileItem extends StatelessWidget {
@@ -50,10 +49,10 @@ class SPFileItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(file.name,
-                  style: Get.theme.textTheme.titleLarge
+                  style: Theme.of(context).textTheme.titleLarge
                 ),
                 Text(file.uploadTimestamp.toString(),
-                    style: Get.theme.textTheme.bodySmall
+                    style: Theme.of(context).textTheme.bodySmall
                 ),
               ],
             )),

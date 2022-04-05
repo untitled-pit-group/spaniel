@@ -3,7 +3,6 @@ import "dart:math";
 
 import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
-import "package:get/get.dart";
 import "package:list_ext/list_ext.dart";
 import "package:spaniel/pifs/client.dart";
 import "package:spaniel/pifs/data/file.dart";
@@ -38,15 +37,9 @@ class SPHome extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text("my_files".tr, style: Get.theme.textTheme.headlineLarge),
+        Text("my_files", style: Theme.of(context).textTheme.headlineLarge),
         ...List.generate(20, (_) => _generateFakeFile())
-        .map((e) => GestureDetector(
-          onTap: () => Get.to(() => BlocProvider<SPFileBloc>(
-            create: (context) => SPFileBloc(SPFileBlocState.initial(e), client: Get.find<PifsClient>()),
-            child: const SPFile(),
-          )),
-          child: SPFileItem(file: e)
-        ))
+        .map((e) => SPFileItem(file: e))
       ]
     );
   }
@@ -70,15 +63,9 @@ class SPHome extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("home_title".tr)
+        title: Text("home_title")
       ),
       body: _getBody(context),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.upload),
-        onPressed: () {
-          Get.to(() => SPUpload());
-        },
-      ),
     );
   }
 }

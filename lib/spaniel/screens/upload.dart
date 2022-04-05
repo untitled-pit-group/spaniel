@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import "package:get/get.dart";
 
 class SPUpload extends StatelessWidget {
   const SPUpload({Key? key}) : super(key: key);
@@ -7,10 +6,10 @@ class SPUpload extends StatelessWidget {
   Widget _getBody(BuildContext context) {
     return Column(
       children: [
-        Text("upload.choose_file".tr),
+        Text("upload.choose_file"),
         ElevatedButton(
           onPressed: () {},
-          child: Text("upload".tr)
+          child: Text("upload")
         )
       ]
     );
@@ -20,7 +19,7 @@ class SPUpload extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text("upload".tr)
+          title: Text("upload")
       ),
       body: _getBody(context),
     );

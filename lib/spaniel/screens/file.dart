@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import "package:get/get.dart";
 import "package:spaniel/pifs/data/file.dart";
 import "package:spaniel/spaniel/bloc/file.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
@@ -24,8 +23,8 @@ class SPFile extends StatelessWidget {
             Icon(typeVisual.icon, size: 48),
             Column(
               children: [
-                Text("file.details_title".tr, style: Get.theme.textTheme.titleLarge),
-                Text(typeVisual.name.tr, style: Get.theme.textTheme.labelMedium),
+                Text("file.details_title", style: Theme.of(context).textTheme.titleLarge),
+                Text(typeVisual.name, style: Theme.of(context).textTheme.labelMedium),
                 Wrap(
                   children: [...?state.file?.tags.map((e) => Chip(label: Text(e)))],
                 )
@@ -35,14 +34,14 @@ class SPFile extends StatelessWidget {
         ),
         Column(
             children: [
-              Text("file.date_uploaded".tr, style: Get.theme.textTheme.titleSmall),
-              Text(dateFormatter.format(state.file?.uploadTimestamp ?? DateTime.now()), style: Get.theme.textTheme.labelMedium),
+              Text("file.date_uploaded", style: Theme.of(context).textTheme.titleSmall),
+              Text(dateFormatter.format(state.file?.uploadTimestamp ?? DateTime.now()), style: Theme.of(context).textTheme.labelMedium),
             ]
         ),
         Column(
             children: [
-              Text("file.date_relevant".tr, style: Get.theme.textTheme.titleSmall),
-              Text(dateFormatter.format(state.file?.relevanceTimestamp ?? DateTime.now()), style: Get.theme.textTheme.labelMedium),
+              Text("file.date_relevant", style: Theme.of(context).textTheme.titleSmall),
+              Text(dateFormatter.format(state.file?.relevanceTimestamp ?? DateTime.now()), style: Theme.of(context).textTheme.labelMedium),
             ]
         ),
       ],
@@ -63,7 +62,7 @@ class SPFile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text(BlocProvider.of<SPFileBloc>(context).state.file?.name ?? "file.no_file".tr)
+          title: Text(BlocProvider.of<SPFileBloc>(context).state.file?.name ?? "file.no_file")
       ),
       body: SingleChildScrollView(
         child: BlocBuilder<SPFileBloc, SPFileBlocState>(
