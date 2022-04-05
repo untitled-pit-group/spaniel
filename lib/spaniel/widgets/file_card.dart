@@ -14,23 +14,38 @@ class SPFileCard extends StatefulWidget {
 }
 
 class _SPFileCardState extends State<SPFileCard> {
+  bool isExpanded = false;
+
   Widget _getCardContents(BuildContext context, SPFileBlocState state) {
     if(state.file == null) {
       return const Icon(Icons.mood_bad);
     }
-    return SPFileBaseFragment(file: state.file!);
+    return Column(
+      children: [
+        SPFileBaseFragment(file: state.file!),
+        if(isExpanded) SPFileBaseFragment(file: state.file!)
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(8),
-        child: BlocBuilder<SPFileBloc, SPFileBlocState>(
-          bloc: widget.file,
-          builder: (context, state) {
-            return _getCardContents(context, state);
-          },
+      child: InkWell(
+        onTap: () => setState(() => isExpanded = !isExpanded),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: BlocBuilder<SPFileBloc, SPFileBlocState>(
+            bloc: widget.file,
+            builder: (context, state) {
+              return AnimatedSize(
+                alignment: Alignment.topCenter,
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOutCirc,
+                child: _getCardContents(context, state)
+              );
+            },
+          ),
         ),
       ),
     );
