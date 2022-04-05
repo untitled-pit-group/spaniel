@@ -7,7 +7,7 @@ abstract class Jsonable {
 class JsonRepresentationException implements Exception {
   final dynamic source;
 
-  /// [null] if [source] is not a map, even when a map was expected.
+  /// [null] if [source] was of an invalid shape in general.
   final String? key;
 
   /// The received map has an invalid value at [key].
@@ -15,11 +15,13 @@ class JsonRepresentationException implements Exception {
   // ignore: unnecessary_this, prefer_initializing_formals
   JsonRepresentationException.invalidAtKey(this.source, String key) : this.key = key;
 
-  /// The received value was expected to be a map but wasn't. Sets [key] to [null].
-  JsonRepresentationException.notAMap(this.source) : key = null;
+  /// The received value was expected to be of a certain shape (map, list etc.)
+  /// but wasn't. Sets [key] to [null].
+  JsonRepresentationException.invalidShape(this.source) : key = null;
 
   @override
-  String toString() => "Invalid JSON representation received from server (at $key)";
+  String toString() => "Invalid JSON representation received from server" +
+    (key == null ? " (at $key)" : "");
 }
 typedef _JRE = JsonRepresentationException;
 

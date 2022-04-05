@@ -5,9 +5,9 @@ import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";
 import "package:get/get.dart";
 import "package:list_ext/list_ext.dart";
-import "package:spaniel/pifs/client.dart";
 import "package:spaniel/pifs/data/file.dart";
 import "package:crypto/crypto.dart";
+import "package:spaniel/pifs/support/flutter.dart";
 import "package:spaniel/spaniel/bloc/file.dart";
 import "package:spaniel/spaniel/screens/file.dart";
 import "package:spaniel/spaniel/screens/upload.dart";
@@ -41,10 +41,13 @@ class SPHome extends StatelessWidget {
         Text("my_files".tr, style: Get.theme.textTheme.headlineLarge),
         ...List.generate(20, (_) => _generateFakeFile())
         .map((e) => GestureDetector(
-          onTap: () => Get.to(() => BlocProvider<SPFileBloc>(
-            create: (context) => SPFileBloc(SPFileBlocState.initial(e), client: Get.find<PifsClient>()),
-            child: const SPFile(),
-          )),
+          onTap: () => Get.to(() {
+            final client = PifsClientProvider.of(context);
+            return BlocProvider<SPFileBloc>(
+              create: (context) => SPFileBloc(SPFileBlocState.initial(e), client: client),
+              child: const SPFile(),
+            );
+          }),
           child: SPFileItem(file: e)
         ))
       ]
