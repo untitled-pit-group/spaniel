@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spaniel/spaniel/bloc/file.dart';
@@ -19,19 +18,32 @@ class _SPFileCardState extends State<SPFileCard> {
   bool isExpanded = false;
   bool isEditing = false;
 
+  @override
+  void initState() {
+    super.initState();
+    titleController.addListener(() {
+      final rawName = widget.file.rawFile?.name;
+      if (rawName == null || titleController.text != rawName) {
+        widget.file.add(SPFileBlocSetModifiedName(titleController.text));
+      }
+    });
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    titleController.text = widget.file.state.file?.name ?? "";
+    titleController.text = widget.file.currentName;
   }
 
   Widget _getCardContents(BuildContext context, SPFileBlocState state) {
-    if(state.file == null) {
-      return const Icon(Icons.mood_bad);
+    if (state.file == null) {
+      return const Padding(
+        padding: EdgeInsets.all(20),
+        child: Icon(Icons.mood_bad),
+      );
     }
 
-    if(state.isBusy) {
+    if (state.isBusy) {
       return const Padding(
         padding: EdgeInsets.all(20),
         child: Center(child: CircularProgressIndicator()),
@@ -48,36 +60,42 @@ class _SPFileCardState extends State<SPFileCard> {
         ),
         SPFileExtendedFragment(
           file: state.file!,
-          onDelete: () {
-            showDialog(context: context, builder: (context) {
-              return AlertDialog(
-                title: const Text("Delete file"),
-                content: Text("Are you sure you want to delete ${state.file!.name}?"),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text("Cancel")
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      widget.file.add(SPFileBlocDelete());
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text("Delete")
-                  )
-                ],
-              );
-            });
+          fileBloc: widget.file,
+          onDelete: () => _onDelete(context),
+          onRelevanceTimestampEdit: (ts) {
+            widget.file.add(SPFileBlocSetModifiedRelevanceDate(ts));
           },
-          onEdit: () => setState(() => isEditing = !isEditing),
+          onEdit: () => setState(() => isEditing = true),
+          onCancelEdit: () => setState(() => isEditing = false),
+          onFinishEdit: () => widget.file.add(SPFileBlocSaveChanges()),
           onDownload: () => print("Download"),
           isExpanded: isExpanded,
           isEditing: isEditing,
         )
       ],
     );
+  }
+
+  void _onDelete(BuildContext context) {
+    showDialog(context: context, builder: (context) {
+      return AlertDialog(
+        title: const Text("Delete file"),
+        content: Text("Are you sure you want to delete ${widget.file.currentName}?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              widget.file.add(SPFileBlocDelete());
+              Navigator.of(context).pop();
+            },
+            child: const Text("Delete"),
+          ),
+        ],
+      );
+    });
   }
 
   @override

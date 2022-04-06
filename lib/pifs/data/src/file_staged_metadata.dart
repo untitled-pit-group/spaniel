@@ -1,63 +1,54 @@
+import 'package:dartz/dartz.dart';
 import "package:equatable/equatable.dart";
 import "package:spaniel/pifs/data/file.dart";
 import "package:collection/collection.dart";
+import 'package:spaniel/pifs/parameters/files_edit.dart';
+import 'package:spaniel/pifs/util/dartz.dart';
 
 /// Holds state for the changes given to metadata of a [PifsFile],
 /// allows for non-destructive editing until commit.
+/// 
+/// If an [Option] is a [None], that implies that no changes are yet staged.
+/// Notably for [relevanceTimestamp], a [None] is different than [Some(null)],
+/// where the latter implies that the date was cleared.
 class PifsFileStagedMetadata with EquatableMixin {
-  final String? name;
-  final List<String>? tags;
-  final DateTime? relevanceTimestamp;
+  final Option<String> name;
+  final Option<List<String>> tags;
+  final Option<DateTime?> relevanceTimestamp;
 
-  PifsFileStagedMetadata._internal({
-    required this.name,
-    required this.tags,
-    required this.relevanceTimestamp
-  });
-
-  factory PifsFileStagedMetadata.initial(PifsFile? initial) {
-    return PifsFileStagedMetadata._internal(
-        name: initial?.name,
-        tags: initial != null ? List.of(initial.tags) : null,
-        relevanceTimestamp: initial?.relevanceTimestamp
-    );
-  }
+  PifsFileStagedMetadata._(this.name, this.tags, this.relevanceTimestamp);
+  PifsFileStagedMetadata.blank() :
+    name = const None(), tags = const None(), relevanceTimestamp = const None();
 
   /// Checks if this staged metadata is dirty with respect to the given [PifsFile]
   bool isChanged(PifsFile file) {
-    if(file.name != name) return true;
-    if(file.relevanceTimestamp != relevanceTimestamp) return true;
-    if(tags != null) {
+    if (name is Some && name.unwrapped != file.name) return true;
+    if (tags is Some) {
       // Do a deep comparison of the list contents.
       // BUGBUG: A different order also means different tags! Is this ok?
-      if(!file.tags.equals(tags!)) return true;
+      if(!file.tags.equals(tags.unwrapped)) return true;
+    }
+    if (relevanceTimestamp is Some &&
+        relevanceTimestamp.unwrapped != file.relevanceTimestamp) {
+      return true;
     }
     return false;
   }
 
-  PifsFileStagedMetadata withName(String? name) {
-    return PifsFileStagedMetadata._internal(
-        name: name,
-        tags: tags,
-        relevanceTimestamp: relevanceTimestamp
-    );
-  }
-
-  PifsFileStagedMetadata withTags(List<String>? tags) {
-    return PifsFileStagedMetadata._internal(
-        name: name,
-        tags: tags,
-        relevanceTimestamp: relevanceTimestamp
-    );
-  }
-
-  PifsFileStagedMetadata withRelevanceTimestamp(DateTime? relevanceTimestamp) {
-    return PifsFileStagedMetadata._internal(
-        name: name,
-        tags: tags,
-        relevanceTimestamp: relevanceTimestamp
-    );
-  }
+  PifsFileStagedMetadata withName(String name) =>
+    PifsFileStagedMetadata._(Some(name), tags, relevanceTimestamp);
+  PifsFileStagedMetadata withoutName() =>
+    PifsFileStagedMetadata._(const None(), tags, relevanceTimestamp);
+  PifsFileStagedMetadata withTags(List<String> tags) =>
+    PifsFileStagedMetadata._(name, Some(tags), relevanceTimestamp);
+  PifsFileStagedMetadata withoutTags() =>
+    PifsFileStagedMetadata._(name, const None(), relevanceTimestamp);
+  PifsFileStagedMetadata withRelevanceTimestamp(DateTime timestamp) =>
+    PifsFileStagedMetadata._(name, tags, Some(timestamp));
+  PifsFileStagedMetadata withWipedRelevanceTimestamp() =>
+    PifsFileStagedMetadata._(name, tags, const Some(null));
+  PifsFileStagedMetadata withoutRelevanceTimestamp() =>
+    PifsFileStagedMetadata._(name, tags, const None());
 
   @override List<Object?> get props => [name, tags, relevanceTimestamp];
 }

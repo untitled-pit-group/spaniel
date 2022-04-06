@@ -3,6 +3,8 @@ import "package:equatable/equatable.dart";
 import "package:spaniel/pifs/client.dart";
 import "package:spaniel/pifs/data/file.dart";
 import "package:spaniel/pifs/data/src/file_staged_metadata.dart";
+import 'package:spaniel/pifs/parameters/files_edit.dart';
+import 'package:spaniel/pifs/util/dartz.dart';
 
 abstract class SPFileBlocEvent {}
 
@@ -32,10 +34,13 @@ class SPFileBlocSetModifiedTags implements SPFileBlocEvent {
 /// Modify events stage changes for modification, but the changes are commited
 /// with a [SPFileBlocSaveChanges] event.
 class SPFileBlocSetModifiedRelevanceDate implements SPFileBlocEvent {
-  /// The new name to set for the file
+  /// The new relevance timestamp. If [null], the timestamp will be cleared.
   final DateTime? relevanceTimestamp;
   SPFileBlocSetModifiedRelevanceDate(this.relevanceTimestamp);
 }
+
+/// Remove pending modifications to the relevance date.
+class SPFileBlocClearModifiedRelevanceDate implements SPFileBlocEvent {}
 
 class SPFileBlocSaveChanges implements SPFileBlocEvent {}
 
@@ -59,7 +64,7 @@ class SPFileBlocState extends Equatable {
     return SPFileBlocState._internal(
       isBusy: false,
       file: file,
-      stagedMetadata: PifsFileStagedMetadata.initial(file)
+      stagedMetadata: PifsFileStagedMetadata.blank(),
     );
   }
 
@@ -91,7 +96,7 @@ class SPFileBlocState extends Equatable {
 class SPFileBloc extends Bloc<SPFileBlocEvent, SPFileBlocState> {
   final PifsClient client;
 
-  final Function(SPFileBloc)? onDelete;
+  final Function(SPFileBloc, Error?)? onDelete;
 
   SPFileBloc(SPFileBlocState initialState, {
     required this.client,
@@ -103,7 +108,16 @@ class SPFileBloc extends Bloc<SPFileBlocEvent, SPFileBlocState> {
     on<SPFileBlocSetModifiedName>(_onSetModifiedName);
     on<SPFileBlocSetModifiedTags>(_onSetModifiedTags);
     on<SPFileBlocSetModifiedRelevanceDate>(_onSetModifiedRelevanceDate);
+    on<SPFileBlocClearModifiedRelevanceDate>(_onClearModifiedRelevanceDate);
   }
+
+  PifsFile? get rawFile => state.file;
+  String get currentName =>
+    state.stagedMetadata.name.optional ?? state.file?.name ?? "<BUG>";
+  List<String> get currentTags =>
+    state.stagedMetadata.tags.optional ?? state.file?.tags ?? [];
+  DateTime? get currentRelevanceTimestamp =>
+    state.stagedMetadata.relevanceTimestamp.optional ?? state.file?.relevanceTimestamp;
 
   Future<void> _onDownload(SPFileBlocDownload event, Emitter emit) async {
     /// TODO: Don't touch this until we know how the download from will work
@@ -113,24 +127,57 @@ class SPFileBloc extends Bloc<SPFileBlocEvent, SPFileBlocState> {
   Future<void> _onDelete(SPFileBlocDelete event, Emitter emit) async {
     /// TODO: Don't touch this until we can provide interface for delete
     emit(state.withBusy(true));
-    await Future.delayed(const Duration(milliseconds: 200));
-    onDelete?.call(this);
-    emit(state.withFile(null));
+    await Future.delayed(const Duration(milliseconds: 500));
+    final error = StateError("whoops");
+    onDelete?.call(this, error);
+    emit(state.withBusy(false));
+    // emit(state.withFile(null));
   }
 
   Future<void> _onSaveChanges(SPFileBlocSaveChanges event, Emitter emit) async {
-    throw UnimplementedError();
+    emit(state.withBusy(true));
+
+    var editParams = PifsFilesEditParameters.blank(state.file!.id);
+    state.stagedMetadata.name.fold(() {}, (name) => editParams.setName(name));
+    state.stagedMetadata.tags.fold(() {}, (tags) => editParams.setTags(tags));
+    state.stagedMetadata.relevanceTimestamp
+      .fold(() {}, (timestamp) => editParams.setRelevanceTimestamp(timestamp));
+    
+    final editResult = await client.filesEdit(editParams);
+    editResult.fold((newFile) {
+      emit(state
+        .withBusy(false)
+        .withFile(newFile)
+        .withStagedMetadata(PifsFileStagedMetadata.blank()));
+      print("edit succeeded");
+    }, (error) {
+      // TODO: Throw this back into edit mode
+      print("edit failed: $error");
+      emit(state.withBusy(false));
+      throw error;
+    });
   }
 
   void _onSetModifiedName(SPFileBlocSetModifiedName event, Emitter emit) async {
-    throw UnimplementedError();
+    emit(state.withStagedMetadata(state.stagedMetadata.withName(event.name)));
   }
 
   void _onSetModifiedTags(SPFileBlocSetModifiedTags event, Emitter emit) async {
-    throw UnimplementedError();
+    emit(state.withStagedMetadata(state.stagedMetadata.withTags(event.tags)));
   }
 
   void _onSetModifiedRelevanceDate(SPFileBlocSetModifiedRelevanceDate event, Emitter emit) async {
-    throw UnimplementedError();
+    PifsFileStagedMetadata md;
+    if (event.relevanceTimestamp == null) {
+      md = state.stagedMetadata.withRelevanceTimestamp(event.relevanceTimestamp!);
+    } else {
+      md = state.stagedMetadata.withWipedRelevanceTimestamp();
+    }
+    emit(state.withStagedMetadata(md));
+  }
+
+  void _onClearModifiedRelevanceDate(SPFileBlocClearModifiedRelevanceDate event, Emitter emit) async {
+    var md = state.stagedMetadata.withoutRelevanceTimestamp();
+    emit(state.withStagedMetadata(md));
   }
 }

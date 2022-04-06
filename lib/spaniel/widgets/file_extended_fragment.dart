@@ -1,22 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:spaniel/pifs/data/file.dart';
+import 'package:spaniel/spaniel/bloc/file.dart';
 import 'package:spaniel/spaniel/visual/bytes_formatter.dart';
 import 'package:spaniel/spaniel/visual/datetime_formatter.dart';
 
 
 class SPFileExtendedFragment extends StatelessWidget {
   final PifsFile file;
+  final SPFileBloc fileBloc;
   final Function() onDownload;
   final Function() onEdit;
   final Function() onDelete;
+  final Function() onCancelEdit;
+  final Function() onFinishEdit;
+  final Function(DateTime?) onRelevanceTimestampEdit;
   final bool isExpanded;
   final bool isEditing;
 
   const SPFileExtendedFragment({
     required this.file,
+    required this.fileBloc,
     required this.onDownload,
     required this.onEdit,
     required this.onDelete,
+    required this.onCancelEdit,
+    required this.onFinishEdit,
+    required this.onRelevanceTimestampEdit,
     required this.isExpanded,
     this.isEditing = false,
     Key? key
@@ -111,19 +120,25 @@ class SPFileExtendedFragment extends StatelessWidget {
         Row(
           children: [
             Expanded(child: Text("Relevance date", style: Theme.of(context).textTheme.titleMedium)),
-            Text(dateFormatter.format(file.relevanceTimestamp),
+            Text(dateFormatter.format(fileBloc.currentRelevanceTimestamp),
               textAlign: TextAlign.right,
               style: Theme.of(context).textTheme.labelLarge
             ),
+            const SizedBox(width: 8.0),
             OutlinedButton(
-              onPressed: () => showDatePicker(
-                  context: context,
-                  initialDate: file.relevanceTimestamp ?? DateTime.now(),
-                  firstDate: DateTime.fromMillisecondsSinceEpoch(0),
-                  lastDate: DateTime.utc(2032)
-              ),
-              child: Text("Choose")
-            )
+              onPressed: () async {
+                final date = await showDatePicker(
+                    context: context,
+                    initialDate: file.relevanceTimestamp ?? DateTime.now(),
+                    firstDate: DateTime.fromMillisecondsSinceEpoch(0),
+                    lastDate: DateTime.utc(2032)
+                );
+                print("chose date! $date");
+                fileBloc.add(SPFileBlocSetModifiedRelevanceDate(date));
+                // onRelevanceTimestampEdit(date);
+              },
+              child: const Text("Choose"),
+            ),
           ],
         ),
         const Divider(),
@@ -135,14 +150,14 @@ class SPFileExtendedFragment extends StatelessWidget {
           children: [
             Expanded(
                 child: TextButton(
-                    onPressed: onEdit,
+                    onPressed: onFinishEdit,
                     child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [Icon(Icons.done), Text("Done")]
                     ))),
             Expanded(
                 child: TextButton(
-                    onPressed: onEdit,
+                    onPressed: onCancelEdit,
                     child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [Icon(Icons.close), Text("Cancel")]

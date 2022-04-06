@@ -11,6 +11,6 @@ class SPReadableDateTimeFormatter implements SPDateTimeFormatter {
 
   @override
   String format(DateTime? dateTime) {
-    return dateTime != null ? formatter.format(dateTime) : "-";
+    return dateTime != null ? formatter.format(dateTime) : "—";
   }
 }

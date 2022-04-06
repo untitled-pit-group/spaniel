@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:spaniel/pifs/client.dart';
 import 'package:spaniel/spaniel/bloc/file.dart';
 
@@ -65,9 +66,11 @@ class SPFileListState with EquatableMixin {
 
 class SPFileList extends Bloc<SPFileListEvent, SPFileListState> {
   final PifsClient client;
+  final ScaffoldMessengerState scaffoldMessenger;
 
   SPFileList({
-    required this.client
+    required this.client,
+    required this.scaffoldMessenger,
   }) : super(SPFileListState.initial()) {
     on<SPFileListReload>(_onReloadFiles);
     on<SPFileListRemove>((event, emit) => emit(state.withRemovedFile(event.file)));
@@ -80,7 +83,15 @@ class SPFileList extends Bloc<SPFileListEvent, SPFileListState> {
       (result) => result.map((f) => SPFileBloc(
         SPFileBlocState.initial(f),
         client: client,
-        onDelete: (file) => add(SPFileListRemove(file))
+        onDelete: (file, error) {
+          if (error == null) {
+            add(SPFileListRemove(file));
+          } else {
+            scaffoldMessenger.showSnackBar(SnackBar(
+              content: Text("Failed to delete file: $error"),
+            ));
+          }
+        },
       )).toList(),
       (error) => [],
     )).withBusy(false));

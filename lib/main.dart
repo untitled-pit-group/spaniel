@@ -29,7 +29,7 @@ class SpanielApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: S.delegate.supportedLocales,
-      home: PifsMockClientConnector(child: Builder(
+      home: PifsFoxhoundClientConnector(child: Builder(
         builder: (context) {
           final client = PifsClientProvider.of(context).client;
           if(client is PifsIndeterminateClient) {
@@ -39,8 +39,9 @@ class SpanielApp extends StatelessWidget {
           } else if (client is PifsOfflineClient) {
             return const Icon(Icons.cloud_off);
           } else {
+            final messenger = ScaffoldMessenger.of(context);
             return BlocProvider<SPFileList>(
-              create: (_) => SPFileList(client: client)
+              create: (_) => SPFileList(client: client, scaffoldMessenger: messenger)
                 ..add(SPFileListReload()),
               lazy: false,
               child: const SPHome()
