@@ -5,7 +5,10 @@ import "package:dartz/dartz.dart";
 import "package:list_ext/list_ext.dart";
 import "package:spaniel/pifs/client.dart";
 import "package:spaniel/pifs/data/file.dart";
+import 'package:spaniel/pifs/data/search_result.dart';
+import 'package:spaniel/pifs/data/src/range.dart';
 import 'package:spaniel/pifs/fakes/fake_client.dart';
+import 'package:spaniel/pifs/parameters/parameters.dart';
 
 class PifsMockClient extends PifsFakeClient {
   static const instance = PifsMockClient();
@@ -31,9 +34,24 @@ class PifsMockClient extends PifsFakeClient {
     );
   }
 
+  PifsPlainSearchResult _generateFakePlainResult() {
+    final Random _rnd = Random();
+    return PifsPlainSearchResult(
+      fileId: getRandomString(16),
+      fragment: "The mišsle kn0ws wh🙈🤪你好 čau",
+      ranges: [PifsRange(7,15),PifsRange(18,22)]
+    );
+  }
+
   @override
   PifsResponse<List<PifsFile>> filesList() async {
     await Future.delayed(const Duration(milliseconds: 200));
     return Left(List.generate(30, (_) => _generateFakeFile()));
+  }
+
+  @override
+  PifsResponse<List<PifsSearchResult>> searchPerform(PifsSearchPerformParameters params) async {
+    await Future.delayed(const Duration(milliseconds: 200));
+    return Left(List.generate(30, (_) => _generateFakePlainResult()));
   }
 }

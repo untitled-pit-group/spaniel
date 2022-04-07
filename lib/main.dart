@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import "package:spaniel/generated/l10n.dart";
 import 'package:spaniel/pifs/fakes/offline_client.dart';
 import 'package:spaniel/spaniel/bloc/file_list.dart';
+import 'package:spaniel/spaniel/bloc/search.dart';
 import "package:spaniel/spaniel/screens/home.dart";
 import "package:flutter_localizations/flutter_localizations.dart";
 import "package:spaniel/pifs/support/flutter.dart";
@@ -39,12 +40,14 @@ class SpanielApp extends StatelessWidget {
           } else if (client is PifsOfflineClient) {
             return const Icon(Icons.cloud_off);
           } else {
-            return BlocProvider<SPFileList>(
-              create: (_) => SPFileList(client: client)
-                ..add(SPFileListReload()),
-              lazy: false,
-              child: const SPHome()
-            );
+            return MultiBlocProvider(providers: [
+              BlocProvider<SPFileList>(
+                create: (_) => SPFileList(client: client)..add(SPFileListReload()),
+              ),
+              BlocProvider<SPSearchBloc>(
+                create: (_) => SPSearchBloc(client: client),
+              ),
+            ], child: const SPHome());
           }
         }
       ))
