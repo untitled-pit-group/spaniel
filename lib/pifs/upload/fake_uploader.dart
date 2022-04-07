@@ -28,7 +28,6 @@ class PifsFakeUploadTask implements PifsUploadTask {
       lastProgress = 1.0;
       _progress.close();
     } on Error catch (error, stack) {
-      _progress.addError(error, stack);
       _progress.close();
       rethrow;
     }

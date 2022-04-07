@@ -17,8 +17,10 @@ class PifsUploadCheckpoint {
 class PifsUploadInterruptedError extends Error {}
 
 abstract class PifsUploadTask {
-  /// A [Stream] of checkpoint events. The stream will always be closed when the
-  /// upload is finished or interrupted (with an error in the latter case.)
+  /// A broadcast [Stream] of checkpoint events. The stream will always be
+  /// closed when the upload is finished or interrupted, though errors will
+  /// only be delivered to the [complete] future; this stream will simply get
+  /// closed.
   Stream<PifsUploadCheckpoint> get progress;
 
   double get lastProgress;
@@ -27,7 +29,7 @@ abstract class PifsUploadTask {
   Future<void> get complete;
 
   /// Cancel the upload. Causes a [PifsUploadCancelledError] to be returned from
-  /// the [complete] future, as well as in the [progress] stream.
+  /// the [complete] future.
   void cancel();
 }
 

@@ -108,7 +108,6 @@ class PifsGcsUploadTask implements PifsUploadTask {
       _progress.close();
       _complete.complete();
     } else {
-      _progress.addError(error, trace);
       _progress.close();
       _complete.completeError(error, trace);
     }
