@@ -24,13 +24,33 @@ class PifsGcsUploadTask implements PifsUploadTask {
   int _currentLength = 0;
   final int _totalLength;
 
+  /// Keep an instance of a Client around so that we don't have to open a new
+  /// connection every time.
+  final Client _connection = Client();
+
   final Completer<void> _complete = Completer.sync();
   @override
   Future<void> get complete => _complete.future;
 
-  PifsGcsUploadTask._(this._chunkSource, this._target, this._totalLength);
+  static const _gcsChunkStride = 256 * 1024; // 256 KiB
 
-  static const chunkSize = 16*4 * 256*1024; // 16 MiB = 64 x 256 KiB
+  PifsGcsUploadTask._(this._chunkSource, this._target, this._totalLength) {
+    // GCS has a hard limit of 10_000 chunks. We need at least 100 to have a
+    // meaningful semblance of progress.
+    var maxChunk = (this._totalLength / 100).floor();
+    // Round down to the nearest power of 256 KiB.
+    maxChunk -= maxChunk % _gcsChunkStride;
+    if (maxChunk == 0) {
+      // If the chunk size is below stride, just deal with it and use chunks of
+      // the smallest size.
+      maxChunk = _gcsChunkStride;
+    }
+    assert(maxChunk % _gcsChunkStride == 0);
+    assert(maxChunk > 0);
+    _chunkSize = maxChunk;
+  }
+
+  late final int _chunkSize;
   final _chunkBuffer = BytesBuilder(copy: true);
 
   bool _finished = false;
@@ -49,7 +69,7 @@ class PifsGcsUploadTask implements PifsUploadTask {
     );
   }
   Future<void> _initiateSession() async {
-    var response = await post(_target, headers: {
+    var response = await _connection.post(_target, headers: {
       "Content-Length": "0",
       "Content-Type": "application/octet-stream",
       "x-goog-resumable": "start",
@@ -57,7 +77,7 @@ class PifsGcsUploadTask implements PifsUploadTask {
     if (response.statusCode != 201) {
       throw PifsGcsUploadError(response);
     }
-    _session = Uri.parse(response.headers["Location"]!);
+    _session = Uri.parse(response.headers["location"]!);
   }
 
   void _notifyProgress() {
@@ -76,9 +96,8 @@ class PifsGcsUploadTask implements PifsUploadTask {
     }
 
     if (error == null) {
-      _progress.add(PifsUploadCheckpoint(1.0, _totalLength));
+      _notifyProgress();
       _progress.close();
-      lastProgress = 1.0;
       _complete.complete();
     } else {
       _progress.addError(error, trace);
@@ -89,7 +108,7 @@ class PifsGcsUploadTask implements PifsUploadTask {
 
   void _onChunk(Uint8List chunk) {
     _chunkBuffer.add(chunk);
-    if (_chunkBuffer.length >= chunkSize) {
+    if (_chunkBuffer.length >= _chunkSize) {
       _chunkSubscription.pause(); // resume in _sendChunk
       _sendChunk().onError(_finish);
     }
@@ -107,7 +126,7 @@ class PifsGcsUploadTask implements PifsUploadTask {
     var firstByte = _currentLength;
     var lastByte = firstByte + chunk.length - 1;
     final isFinalChunk = lastByte == _totalLength - 1;
-    var response = await put(_session, headers: {
+    var response = await _connection.put(_session, headers: {
       "Content-Length": chunk.length.toString(),
       "Content-Range": "bytes $firstByte-$lastByte/$_totalLength",
     }, body: chunk);
