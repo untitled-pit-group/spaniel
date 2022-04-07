@@ -12,6 +12,10 @@ class PifsUploadCheckpoint {
   const PifsUploadCheckpoint(this.progress, this.bytes);
 }
 
+/// An instance of this error is throw in the [complete] future of
+/// [PifsUploadTask] if the upload is cancelled before finishing.
+class PifsUploadInterruptedError extends Error {}
+
 abstract class PifsUploadTask {
   /// A [Stream] of checkpoint events. The stream will always be closed when the
   /// upload is finished or interrupted (with an error in the latter case.)
@@ -21,6 +25,10 @@ abstract class PifsUploadTask {
 
   /// A [Future] that resolves when the upload is complete.
   Future<void> get complete;
+
+  /// Cancel the upload. Causes a [PifsUploadCancelledError] to be returned from
+  /// the [complete] future, as well as in the [progress] stream.
+  void cancel();
 }
 
 /// Interface for backends for uploading.

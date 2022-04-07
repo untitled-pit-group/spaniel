@@ -62,6 +62,11 @@ class PifsGcsUploadTask implements PifsUploadTask {
       _complete.completeError(error, trace);
       return;
     }
+    if (_finished) {
+      // Upload was cancelled while the session was being initiated.
+      _teardownSession();
+      return;
+    }
     _chunkSubscription = _chunkSource.listen(
       _onChunk,
       onError: _finish,
@@ -78,6 +83,9 @@ class PifsGcsUploadTask implements PifsUploadTask {
       throw PifsGcsUploadError(response);
     }
     _session = Uri.parse(response.headers["location"]!);
+  }
+  Future<void> _teardownSession() async {
+    await _connection.delete(_session, headers: {"Content-Length": "0"});
   }
 
   void _notifyProgress() {
@@ -103,6 +111,14 @@ class PifsGcsUploadTask implements PifsUploadTask {
       _progress.addError(error, trace);
       _progress.close();
       _complete.completeError(error, trace);
+    }
+  }
+
+  @override
+  void cancel() {
+    _finish(PifsUploadInterruptedError(), StackTrace.current);
+    if (_session != null) {
+      _teardownSession();
     }
   }
 

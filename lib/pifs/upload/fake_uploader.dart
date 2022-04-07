@@ -33,6 +33,11 @@ class PifsFakeUploadTask implements PifsUploadTask {
       rethrow;
     }
   }
+
+  /// This method does not actually cancel the task.
+  @override
+  void cancel() {
+  }
 }
 
 /// An uploader that discards all incoming data and pretends that it was uploaded
