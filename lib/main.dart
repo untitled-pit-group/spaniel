@@ -29,7 +29,7 @@ class SpanielApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: S.delegate.supportedLocales,
-      home: PifsFakeClientConnector(child: Builder(
+      home: PifsMockClientConnector(child: Builder(
         builder: (context) {
           final client = PifsClientProvider.of(context);
           if(client is PifsIndeterminateClient) {
