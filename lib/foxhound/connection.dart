@@ -35,6 +35,10 @@ class _FXConnectionSink implements StreamSink<String> {
   Future get done => _done.future;
 }
 
+class FXConnectionError extends Error {
+  final http.Response response;
+  FXConnectionError(this.response);
+}
 class FXConnection with StreamChannelMixin<String> implements StreamChannel<String> {
   final _stream = StreamController<String>();
   late final _FXConnectionSink _sink;
@@ -51,6 +55,9 @@ class FXConnection with StreamChannelMixin<String> implements StreamChannel<Stri
   static Future<FXConnection> connect(http.Client connection, String secretKey) async {
     var resp = await connection.post(Uri.parse(Config.fxEndpoint).replace(path: "/auth-token"),
       headers: {"User-Agent": _userAgent}, body: secretKey);
+    if (resp.statusCode != 200) {
+      throw FXConnectionError(resp);
+    }
     var sessionKey = resp.body.trimRight();
     return FXConnection._(connection, sessionKey);
   }

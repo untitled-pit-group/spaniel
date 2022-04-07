@@ -52,7 +52,8 @@ class FoxhoundClient implements PifsClient {
       {bool autoRetryOnTokenExpiry = true}) async {
     try {
       var response = await _connection.sendRequest(method, params.toJson());
-      return Left(response);
+      var transformed = builder(response);
+      return Left(transformed);
     } on jsonrpc.RpcException catch (error) {
       // Special case: if the response is a 2401, the session token has expired
       // and should be renewed, after which the request should be tried again.
