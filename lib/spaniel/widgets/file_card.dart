@@ -72,7 +72,7 @@ class _SPFileCardState extends State<SPFileCard> {
             });
           },
           onEdit: () => setState(() => isEditing = !isEditing),
-          onDownload: () => print("Download"),
+          onDownload: () => widget.file.add(SPFileBlocDownload()),
           isExpanded: isExpanded,
           isEditing: isEditing,
         )

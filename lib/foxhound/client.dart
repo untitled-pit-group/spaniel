@@ -3,6 +3,7 @@ import "package:dartz/dartz.dart";
 import "package:spaniel/config.dart";
 import "package:spaniel/foxhound/connection.dart";
 import "package:spaniel/pifs/client.dart";
+import 'package:spaniel/pifs/data/search_result.dart';
 import "package:spaniel/pifs/error.dart";
 import "package:spaniel/pifs/data/file.dart";
 import "package:spaniel/pifs/data/upload.dart";
@@ -94,5 +95,11 @@ class FoxhoundClient implements PifsClient {
   @override
   PifsResponse<PifsFile> filesEdit(PifsFilesEditParameters params) {
     return _send("files.edit", params, PifsFile.fromJson);
+  }
+
+  @override
+  PifsResponse<List<PifsSearchResult>> searchPerform(PifsSearchPerformParameters params) {
+    // TODO: implement searchPerform
+    throw UnimplementedError();
   }
 }

@@ -1,4 +1,5 @@
 import "package:dartz/dartz.dart";
+import 'package:spaniel/pifs/data/search_result.dart';
 import "package:spaniel/pifs/error.dart";
 import "package:spaniel/pifs/data/upload.dart";
 import "package:spaniel/pifs/data/file.dart";
@@ -25,4 +26,6 @@ abstract class PifsClient {
 
   /// Change the user-editable metadata of a file.
   PifsResponse<PifsFile> filesEdit(PifsFilesEditParameters params);
+
+  PifsResponse<List<PifsSearchResult>> searchPerform(PifsSearchPerformParameters params);
 }

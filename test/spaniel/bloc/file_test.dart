@@ -4,7 +4,7 @@ import "package:flutter_test/flutter_test.dart";
 import "package:mocktail/mocktail.dart";
 import "package:spaniel/pifs/client.dart";
 import "package:spaniel/pifs/data/file.dart";
-import "package:spaniel/pifs/parameters/files_edit.dart";
+import 'package:spaniel/pifs/parameters/src/files_edit.dart';
 import "package:spaniel/spaniel/bloc/file.dart";
 
 class _MockClient extends Mock implements PifsClient {}
