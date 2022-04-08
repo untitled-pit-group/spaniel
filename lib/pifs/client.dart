@@ -24,6 +24,8 @@ abstract class PifsClient {
   /// List all uploaded files.
   PifsResponse<List<PifsFile>> filesList();
 
+  PifsResponse<PifsFile> filesGet(PifsFilesGetParameters params);
+
   /// Change the user-editable metadata of a file.
   PifsResponse<PifsFile> filesEdit(PifsFilesEditParameters params);
 
