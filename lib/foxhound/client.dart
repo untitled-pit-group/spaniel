@@ -72,8 +72,8 @@ class FoxhoundClient implements PifsClient {
   }
 
   @override
-  PifsResponse<PifsUpload> uploadBegin(PifsUploadsBeginParameters params) {
-    return _send("uploads.begin", params, PifsUpload.fromJson);
+  PifsResponse<PifsTargetableUpload> uploadBegin(PifsUploadsBeginParameters params) {
+    return _send("uploads.begin", params, PifsTargetableUpload.fromJson);
   }
 
   @override

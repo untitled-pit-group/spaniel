@@ -12,7 +12,7 @@ typedef PifsResponse<T> = Future<Either<T, PifsError>>;
 abstract class PifsClient {
   /// Mint a GCS signed target URL to perform a file upload onto.
   /// The logistics of the upload and long-term storage are handled by GCS, not by the API server.
-  PifsResponse<PifsUpload> uploadBegin(PifsUploadsBeginParameters params);
+  PifsResponse<PifsTargetableUpload> uploadBegin(PifsUploadsBeginParameters params);
 
   /// Report to the server that a file upload has been finished and any necessary processing can begin.
   /// This MUST be called only after the entire file is uploaded and finalized.

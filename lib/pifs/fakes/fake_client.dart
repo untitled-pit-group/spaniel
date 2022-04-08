@@ -20,7 +20,7 @@ class PifsFakeClient implements PifsClient {
   }
 
   @override
-  PifsResponse<PifsUpload> uploadBegin(PifsUploadsBeginParameters params) {
+  PifsResponse<PifsTargetableUpload> uploadBegin(PifsUploadsBeginParameters params) {
     throw UnimplementedError();
   }
 
