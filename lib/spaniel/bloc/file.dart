@@ -59,7 +59,7 @@ class SPFileBlocState extends Equatable {
     return SPFileBlocState._internal(
       isBusy: false,
       file: file,
-      stagedMetadata: PifsFileStagedMetadata.initial(file)
+      stagedMetadata: const PifsFileStagedMetadata.blank(),
     );
   }
 

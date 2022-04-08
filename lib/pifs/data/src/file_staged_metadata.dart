@@ -1,63 +1,51 @@
+import 'package:dartz/dartz.dart';
 import "package:equatable/equatable.dart";
 import "package:spaniel/pifs/data/file.dart";
-import "package:collection/collection.dart";
 
+typedef _PFSM = PifsFileStagedMetadata;
 /// Holds state for the changes given to metadata of a [PifsFile],
 /// allows for non-destructive editing until commit.
+/// 
+/// If an [Option] is a [Some], it implies that the given metadata item has been
+/// edited; if it's a [None], it retains the value of the original file.
 class PifsFileStagedMetadata with EquatableMixin {
-  final String? name;
-  final List<String>? tags;
-  final DateTime? relevanceTimestamp;
+  final Option<String> name;
+  final Option<Set<String>> tags;
 
-  PifsFileStagedMetadata._internal({
+  /// A [Some(null)] implies that the relevance timestamp should explicitly be
+  /// unset.
+  final Option<DateTime?> relevanceTimestamp;
+
+  const PifsFileStagedMetadata._internal({
     required this.name,
     required this.tags,
-    required this.relevanceTimestamp
+    required this.relevanceTimestamp,
   });
-
-  factory PifsFileStagedMetadata.initial(PifsFile? initial) {
-    return PifsFileStagedMetadata._internal(
-        name: initial?.name,
-        tags: initial != null ? List.of(initial.tags) : null,
-        relevanceTimestamp: initial?.relevanceTimestamp
-    );
-  }
+  const PifsFileStagedMetadata.blank() :
+    name = const None(), tags = const None(),
+    relevanceTimestamp = const None();
 
   /// Checks if this staged metadata is dirty with respect to the given [PifsFile]
   bool isChanged(PifsFile file) {
-    if(file.name != name) return true;
-    if(file.relevanceTimestamp != relevanceTimestamp) return true;
-    if(tags != null) {
-      // Do a deep comparison of the list contents.
-      // BUGBUG: A different order also means different tags! Is this ok?
-      if(!file.tags.equals(tags!)) return true;
-    }
+    if (name is Some && (name as Some).value != file.name) return true;
+    if (relevanceTimestamp is Some &&
+        (relevanceTimestamp as Some).value != file.name) return true;
+    if (tags is Some && (tags as Some).value != file.tags) return true;
     return false;
   }
 
-  PifsFileStagedMetadata withName(String? name) {
-    return PifsFileStagedMetadata._internal(
-        name: name,
-        tags: tags,
-        relevanceTimestamp: relevanceTimestamp
-    );
-  }
-
-  PifsFileStagedMetadata withTags(List<String>? tags) {
-    return PifsFileStagedMetadata._internal(
-        name: name,
-        tags: tags,
-        relevanceTimestamp: relevanceTimestamp
-    );
-  }
-
-  PifsFileStagedMetadata withRelevanceTimestamp(DateTime? relevanceTimestamp) {
-    return PifsFileStagedMetadata._internal(
-        name: name,
-        tags: tags,
-        relevanceTimestamp: relevanceTimestamp
-    );
-  }
+  _PFSM withName(String name) => _PFSM._internal(
+    name: Some(name), tags: tags, relevanceTimestamp: relevanceTimestamp);
+  _PFSM withoutName() => PifsFileStagedMetadata._internal(
+    name: const None(), tags: tags, relevanceTimestamp: relevanceTimestamp);
+  _PFSM withTags(Set<String> tags) => _PFSM._internal(
+    name: name, tags: Some(tags), relevanceTimestamp: relevanceTimestamp);
+  _PFSM withoutTags() => _PFSM._internal(
+    name: name, tags: const None(), relevanceTimestamp: relevanceTimestamp);
+  _PFSM withRelevanceTimestamp(DateTime? relevanceTimestamp) => _PFSM._internal(
+    name: name, tags: tags, relevanceTimestamp: Some(relevanceTimestamp));
+  _PFSM withoutRelevanceTimestamp() => _PFSM._internal(
+    name: name, tags: tags, relevanceTimestamp: const None());
 
   @override List<Object?> get props => [name, tags, relevanceTimestamp];
 }
