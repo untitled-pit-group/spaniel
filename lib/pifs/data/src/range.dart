@@ -7,11 +7,16 @@ class PifsRange {
   PifsRange(this.start, this.end);
 
   factory PifsRange.fromJson(dynamic json) {
-    if (json is Map<String, dynamic>) {
-      final j = Unjsoner(json);
-      return PifsRange(j.v<int>("start"), j.v<int>("end"));
+    if (json is List<dynamic> &&
+        json.length == 2 &&
+        json[0] is int && json[1] is int) {
+      return PifsRange(json[0], json[1]);
     } else {
       throw JsonRepresentationException.invalidShape(json);
     }
+  }
+
+  static List<PifsRange> fromJsonList(List<dynamic> json) {
+    return json.map((elem) => PifsRange.fromJson(elem)).toList(growable: false);
   }
 }
