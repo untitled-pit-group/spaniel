@@ -1,32 +1,35 @@
+import 'package:dartz/dartz.dart';
 import "package:spaniel/pifs/support/json.dart";
+import 'package:spaniel/pifs/util/dartz.dart';
 
 class PifsFilesEditParameters implements Jsonable {
   /// The file ID.
   final String fileId;
 
   /// The new filename of the file.
-  final String name;
+  final Option<String> name;
 
   /// An array of string tags. This will replace any tags previously set so should be used with care to prevent race conditions from losing data.
-  final List<String> tags;
+  final Option<Set<String>> tags;
 
   /// A string containing an RFC 3339 datetimestamp with second precision or [null] if not set.
-  final DateTime? relevanceTimestamp;
+  final Option<DateTime?> relevanceTimestamp;
 
 
   PifsFilesEditParameters({
     required this.fileId,
-    required this.name,
-    required this.tags,
-    required this.relevanceTimestamp
+    this.name = const None(),
+    this.tags = const None(),
+    this.relevanceTimestamp = const None(),
   });
 
   @override dynamic toJson() {
-    return {
+    return <String, dynamic>{
       "file_id": fileId,
-      "name": name,
-      "tags": tags,
-      "relevanceTimestamp": relevanceTimestamp?.toIso8601String()
+      if (name is Some) "name": name.unwrapped,
+      if (tags is Some) "tags": tags.unwrapped.toList(growable: false),
+      if (relevanceTimestamp is Some)
+        "relevance_timestamp": relevanceTimestamp.unwrapped?.toIso8601String(),
     };
   }
 }

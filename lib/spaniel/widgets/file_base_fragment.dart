@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:spaniel/pifs/data/file.dart";
 import 'package:spaniel/spaniel/visual/datetime_formatter.dart';
+import 'package:spaniel/spaniel/visual/file_type_visual.dart';
 
 class SPFileBaseFragment extends StatelessWidget {
   final PifsFile file;
@@ -17,20 +18,7 @@ class SPFileBaseFragment extends StatelessWidget {
   }) : super(key: key);
 
   Widget _getFileIcon(BuildContext context) {
-    IconData? iconData;
-
-    switch(file.type) {
-      case PifsFileType.document:
-        iconData = Icons.description;
-        break;
-      case PifsFileType.plain:
-        iconData = Icons.subject;
-        break;
-      case PifsFileType.media:
-        iconData = Icons.perm_media;
-        break;
-    }
-
+    IconData iconData = fileTypeVisuals[file.type]!.icon;
     return Icon(
       iconData,
       size: 40,

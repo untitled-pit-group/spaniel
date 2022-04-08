@@ -15,4 +15,5 @@ const Map<PifsFileType, SPFileTypeVisual> fileTypeVisuals = {
   PifsFileType.plain: SPFileTypeVisual("filetype.plain", Icons.subject),
   PifsFileType.document: SPFileTypeVisual("filetype.document", Icons.description),
   PifsFileType.media: SPFileTypeVisual("filetype.media", Icons.perm_media),
+  PifsFileType.unknown: SPFileTypeVisual("filetype.unknown", Icons.cloud_sync),
 };
