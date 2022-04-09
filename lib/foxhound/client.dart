@@ -72,8 +72,8 @@ class FoxhoundClient implements PifsClient {
   }
 
   @override
-  PifsResponse<PifsUpload> uploadBegin(PifsUploadsBeginParameters params) {
-    return _send("uploads.begin", params, PifsUpload.fromJson);
+  PifsResponse<PifsTargetableUpload> uploadBegin(PifsUploadsBeginParameters params) {
+    return _send("uploads.begin", params, PifsTargetableUpload.fromJson);
   }
 
   @override
@@ -84,6 +84,11 @@ class FoxhoundClient implements PifsClient {
   @override
   PifsResponse<PifsFile> uploadFinish(PifsUploadsFinishParameters params) {
     return _send("uploads.finish", params, PifsFile.fromJson);
+  }
+
+  @override
+  PifsResponse<PifsFile> filesGet(PifsFilesGetParameters params) {
+    return _send("files.get", params, PifsFile.fromJson);
   }
 
   @override
@@ -99,7 +104,7 @@ class FoxhoundClient implements PifsClient {
 
   @override
   PifsResponse<List<PifsSearchResult>> searchPerform(PifsSearchPerformParameters params) {
-    // TODO: implement searchPerform
-    throw UnimplementedError();
+    return _send("search.perform", params,
+      const _ListBuilder(PifsSearchResult.fromJson).fromJson);
   }
 }

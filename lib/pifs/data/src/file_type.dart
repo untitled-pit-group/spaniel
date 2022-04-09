@@ -1,5 +1,5 @@
 enum PifsFileType {
-  document, plain, media
+  unknown, document, plain, media
 }
 
 class PifsFileTypeHelper {

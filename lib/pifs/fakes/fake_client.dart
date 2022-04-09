@@ -15,12 +15,17 @@ class PifsFakeClient implements PifsClient {
   }
 
   @override
+  PifsResponse<PifsFile> filesGet(PifsFilesGetParameters params) {
+    throw UnimplementedError();
+  }
+
+  @override
   PifsResponse<List<PifsFile>> filesList() {
     throw UnimplementedError();
   }
 
   @override
-  PifsResponse<PifsUpload> uploadBegin(PifsUploadsBeginParameters params) {
+  PifsResponse<PifsTargetableUpload> uploadBegin(PifsUploadsBeginParameters params) {
     throw UnimplementedError();
   }
 
