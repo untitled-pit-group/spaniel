@@ -1,5 +1,6 @@
 import "package:bloc_test/bloc_test.dart";
 import "package:dartz/dartz.dart";
+import 'package:flutter/foundation.dart';
 import "package:flutter_test/flutter_test.dart";
 import "package:mocktail/mocktail.dart";
 import "package:spaniel/pifs/client.dart";
@@ -13,17 +14,16 @@ void main() {
   final file = PifsFile(
       id: "testId",
       name: "An excellent file",
-      tags: ["Tag1", "Tag2", "Tag3", "Tag4"],
+      tags: {"Tag1", "Tag2", "Tag3", "Tag4"},
       uploadTimestamp: DateTime.now(),
       relevanceTimestamp: DateTime.fromMillisecondsSinceEpoch(0),
       length: 69,
       hash: "test",
-      type: "plain",
-      indexingState: 0
+      type: PifsFileType.document,
+      indexingState: PifsIndexingState.indexed
   );
 
-  // ignore: prefer_function_declarations_over_variables
-  final getBloc = (PifsFile file) {
+  SPFileBloc getBloc(PifsFile file) {
     final client = _MockClient();
     when(() => client.filesEdit(any())).thenAnswer((i) async {
       return Left(file);
@@ -32,30 +32,34 @@ void main() {
       SPFileBlocState.initial(file),
       client: client
     );
-  };
+  }
 
   setUpAll(() {
     // Required for mocks to work
-    registerFallbackValue(PifsFilesEditParameters(
-        fileId: "",
-        name: "",
-        tags: [],
-        relevanceTimestamp: null));
+    registerFallbackValue(PifsFilesEditParameters(fileId: ""));
   });
 
   blocTest("Modify name event sets name in staged metadata",
     build: () => getBloc(file),
     act: (SPFileBloc b) => b.add(SPFileBlocSetModifiedName("Test name")),
     expect: () => [isA<SPFileBlocState>()
-      .having((s) => s.stagedMetadata.name, "name matches", equals("Test name"))
+      .having((s) => s.stagedMetadata.name.toNullable(), "name matches", equals("Test name"))
     ],
   );
 
-  blocTest("Modify tags event sets tags in staged metadata",
+  blocTest("Add tag event adds tag to existing tags",
     build: () => getBloc(file),
-    act: (SPFileBloc b) => b.add(SPFileBlocSetModifiedTags(["NewTag1", "NewTag2"])),
+    act: (SPFileBloc b) => b.add(SPFileBlocAddStagedTag("NewTag1")),
     expect: () => [isA<SPFileBlocState>()
-      .having((s) => s.stagedMetadata.tags, "tags match", orderedEquals(["NewTag1", "NewTag2"]))
+      .having((s) => s.stagedMetadata.tags.toNullable(), "tags match", equals({"Tag1", "Tag2", "Tag3", "Tag4", "NewTag1"}))
+    ],
+  );
+
+  blocTest("Remove tag event removes tag from existing tags",
+    build: () => getBloc(file),
+    act: (SPFileBloc b) => b.add(SPFileBlocRemoveStagedTag("Tag3")),
+    expect: () => [isA<SPFileBlocState>()
+        .having((s) => s.stagedMetadata.tags.toNullable(), "tags match", equals({"Tag1", "Tag2", "Tag4"}))
     ],
   );
 
@@ -63,7 +67,7 @@ void main() {
     build: () => getBloc(file),
     act: (SPFileBloc b) => b.add(SPFileBlocSetModifiedRelevanceDate(DateTime.fromMillisecondsSinceEpoch(10000))),
     expect: () => [isA<SPFileBlocState>()
-      .having((s) => s.stagedMetadata.relevanceTimestamp, "timestamp matches", equals(DateTime.fromMillisecondsSinceEpoch(10000)))
+      .having((s) => s.stagedMetadata.relevanceTimestamp.toNullable(), "timestamp matches", equals(DateTime.fromMillisecondsSinceEpoch(10000)))
     ],
   );
 
@@ -76,19 +80,36 @@ void main() {
     },
   );
 
+  blocTest("Revert restores stagedMetadata to empty",
+    build: () => getBloc(file),
+    act: (SPFileBloc b) => b
+      ..add(SPFileBlocSetModifiedName("Test name"))
+      ..add(SPFileBlocAddStagedTag("NewTag1"))
+      ..add(SPFileBlocRemoveStagedTag("Tag3"))
+      ..add(SPFileBlocSetModifiedRelevanceDate(DateTime.fromMillisecondsSinceEpoch(10000)))
+      ..add(SPFileBlocRevertChanges()),
+    skip: 4,
+    expect: () => [isA<SPFileBlocState>()
+        .having((s) => s.stagedMetadata.relevanceTimestamp.isNone(), "timestamp is none", equals(true))
+        .having((s) => s.stagedMetadata.name.isNone(), "name is none", equals(true))
+        .having((s) => s.stagedMetadata.tags.isNone(), "tags is none", equals(true))
+    ],
+  );
+
   blocTest("Save event calls client files edit with correct arguments",
     build: () => getBloc(file),
     act: (SPFileBloc b) => b
       ..add(SPFileBlocSetModifiedName("Test name"))
-      ..add(SPFileBlocSetModifiedTags(["NewTag1", "NewTag2"]))
+      ..add(SPFileBlocAddStagedTag("NewTag1"))
+      ..add(SPFileBlocRemoveStagedTag("Tag3"))
       ..add(SPFileBlocSetModifiedRelevanceDate(DateTime.fromMillisecondsSinceEpoch(10000)))
       ..add(SPFileBlocSaveChanges()),
     wait: const Duration(seconds: 1), // Wait because save is async
     verify: (SPFileBloc b) { // Use verify because no state is emitted
-      final args = verify(() => b.client.filesEdit(any())).captured.first as PifsFilesEditParameters;
-      expect(args.name, equals("Test name"));
-      expect(args.tags, orderedEquals(["NewTag1", "NewTag2"]));
-      expect(args.relevanceTimestamp, equals(DateTime.fromMillisecondsSinceEpoch(10000)));
+      final args = verify(() => b.client.filesEdit(captureAny())).captured.first as PifsFilesEditParameters;
+      expect(args.name.toNullable(), equals("Test name"));
+      expect(args.tags.toNullable(), equals({"Tag1", "Tag2", "Tag4", "NewTag1"}));
+      expect(args.relevanceTimestamp.toNullable(), equals(DateTime.fromMillisecondsSinceEpoch(10000)));
     },
   );
 }

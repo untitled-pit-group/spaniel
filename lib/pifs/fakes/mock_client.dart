@@ -7,12 +7,13 @@ import "package:spaniel/pifs/client.dart";
 import "package:spaniel/pifs/data/file.dart";
 import 'package:spaniel/pifs/data/search_result.dart';
 import 'package:spaniel/pifs/data/src/range.dart';
+import 'package:spaniel/pifs/error.dart';
 import 'package:spaniel/pifs/fakes/fake_client.dart';
 import 'package:spaniel/pifs/parameters/parameters.dart';
 
 class PifsMockClient extends PifsFakeClient {
-  static const instance = PifsMockClient();
-  const PifsMockClient();
+  static final instance = PifsMockClient();
+  PifsMockClient();
 
   static const _chars = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890";
 
@@ -43,15 +44,41 @@ class PifsMockClient extends PifsFakeClient {
     );
   }
 
+  List<PifsFile>? files;
+
   @override
   PifsResponse<List<PifsFile>> filesList() async {
     await Future.delayed(const Duration(milliseconds: 200));
-    return Left(List.generate(30, (_) => _generateFakeFile()));
+    files ??= List.generate(30, (_) => _generateFakeFile());
+    return Left(files!);
   }
 
   @override
   PifsResponse<List<PifsSearchResult>> searchPerform(PifsSearchPerformParameters params) async {
     await Future.delayed(const Duration(milliseconds: 200));
     return Left(List.generate(30, (_) => _generateFakePlainResult()));
+  }
+
+  @override
+  PifsResponse<PifsFile> filesEdit(PifsFilesEditParameters params) async {
+    await Future.delayed(const Duration(milliseconds: 200));
+    if(files == null) {
+      return Right(PifsError.fromCode(2404));
+    }
+    final f = files!.firstWhere((e) => e.id == params.fileId);
+    final newf = PifsFile(
+        id: f.id,
+        name: params.name.fold(() => f.name, (a) => a),
+        tags: params.tags.fold(() => f.tags, (a) => a),
+        uploadTimestamp: f.uploadTimestamp,
+        relevanceTimestamp: params.relevanceTimestamp.fold(() => f.relevanceTimestamp, (a) => a),
+        length: f.length,
+        hash: f.hash,
+        removalDeadline: f.removalDeadline,
+        type: f.type,
+        indexingState: f.indexingState
+    );
+    files![files!.indexWhere((e) => e.id == params.fileId)] = newf;
+    return Left(newf);
   }
 }

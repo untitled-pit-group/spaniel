@@ -26,7 +26,10 @@ class PifsFileStagedMetadata with EquatableMixin {
     relevanceTimestamp = const None();
 
   /// Checks if this staged metadata is dirty with respect to the given [PifsFile]
-  bool isChanged(PifsFile file) {
+  bool isChanged(PifsFile? file) {
+    if(file == null) {
+      return false;
+    }
     if (name is Some && (name as Some).value != file.name) return true;
     if (relevanceTimestamp is Some &&
         (relevanceTimestamp as Some).value != file.name) return true;

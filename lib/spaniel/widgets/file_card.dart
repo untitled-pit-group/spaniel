@@ -19,6 +19,22 @@ class _SPFileCardState extends State<SPFileCard> {
   bool isExpanded = false;
   bool isEditing = false;
 
+  @override
+  void initState() {
+    super.initState();
+    titleController.addListener(() {
+      final f = widget.file.state.file;
+      if(f != null && f.name != titleController.text) {
+        widget.file.add(SPFileBlocSetModifiedName(titleController.text));
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    titleController.dispose();
+  }
 
   @override
   void didChangeDependencies() {
@@ -47,7 +63,7 @@ class _SPFileCardState extends State<SPFileCard> {
           titleEditController: titleController,
         ),
         SPFileExtendedFragment(
-          file: state.file!,
+          file: widget.file,
           onDelete: () {
             showDialog(context: context, builder: (context) {
               return AlertDialog(
@@ -71,7 +87,14 @@ class _SPFileCardState extends State<SPFileCard> {
               );
             });
           },
-          onEdit: () => setState(() => isEditing = !isEditing),
+          onEdit: () {
+            if(isEditing) {
+              // Revert name controller to default name
+              // If it ends up being updated, the BlocConsumer will catch it
+              titleController.text = state.file?.name ?? "";
+            }
+            setState(() => isEditing = !isEditing);
+          },
           onDownload: () => widget.file.add(SPFileBlocDownload()),
           isExpanded: isExpanded,
           isEditing: isEditing,
@@ -93,7 +116,7 @@ class _SPFileCardState extends State<SPFileCard> {
           child: BlocConsumer<SPFileBloc, SPFileBlocState>(
             bloc: widget.file,
             listenWhen: (previous, current) {
-              if(previous.file != current.file) {
+              if(previous.file?.name != current.file?.name) {
                 titleController.text = current.file?.name ?? "";
               }
               return false;
