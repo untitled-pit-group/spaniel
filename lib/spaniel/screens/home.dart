@@ -61,21 +61,37 @@ class _SPHomeState extends State<SPHome> {
     searchBoxController.dispose();
   }
 
-  Widget _getFileList(BuildContext context) {
-    return BlocBuilder<SPFileList, SPFileListState>(
-      builder: (context, state) {
-        if(state.isBusy) {
-          return const Center(child: CircularProgressIndicator());
+  Widget _getMainList(BuildContext context) {
+    return BlocBuilder<SPUploadManager, SPUploadListState>(
+      builder: (context, uploadState) => BlocBuilder<SPFileList, SPFileListState>(
+        builder: (context, fileState) {
+          if(fileState.isBusy) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          Iterable<Widget> fileWidgets = [const CircularProgressIndicator()];
+          if(!fileState.isBusy) {
+            // Key is required for Flutter to not do weirdness and give
+            // the state of the current widget to a different one
+            fileWidgets = fileState.files.map((e) => SPFileCard(e,
+                key: e.state.file?.id != null ? Key(e.state.file!.id) : null));
+          }
+
+          // Key is required for Flutter to not do weirdness and give
+          // the state of the current widget to a different one
+          Iterable<Widget> uploadWidgets = uploadState.uploads.map((e) => SPUploadCard(upload: e,
+              key: e.state.upload?.id != null ? Key(e.state.upload!.id.raw) : null));
+
+          return ListView(
+              children: [
+                if(uploadWidgets.isNotEmpty) Text("active_uploads", style: Theme.of(context).textTheme.headlineLarge),
+                ...uploadWidgets,
+                Text("my_files", style: Theme.of(context).textTheme.headlineLarge),
+                ...fileWidgets
+              ]
+          );
         }
-        return ListView(
-            children: [
-              Text("my_files", style: Theme.of(context).textTheme.headlineLarge),
-              // Key is required for Flutter to not do weirdness and give
-              // the state of the current widget to a different one
-              ...state.files.map((e) => SPFileCard(e, key: e.state.file?.id != null ? Key(e.state.file!.id) : null))
-            ]
-        );
-      }
+      ),
     );
   }
 
@@ -101,29 +117,12 @@ class _SPHomeState extends State<SPHome> {
     if(inSearch) {
       return _getSearchResultList(context);
     } else {
-      return _getFileList(context);
+      return _getMainList(context);
     }
   }
 
-  Widget _getUploads(BuildContext context) {
-    return BlocBuilder<SPUploadList, SPUploadListState>(
-      builder: (context, state) {
-        return Column(
-          children: [
-            ...state.uploads.map((e) => SPUploadCard(upload: e))
-          ],
-        );
-      }
-    );
-  }
-
   Widget _getBody(BuildContext context) {
-    return Column(
-      children: [
-        _getUploads(context),
-        Expanded(child: _getContents(context)),
-      ],
-    );
+    return _getContents(context);
   }
 
   Future<void> _onUpload(BuildContext context) async {
@@ -131,11 +130,9 @@ class _SPHomeState extends State<SPHome> {
 
     if (result != null) {
       File file = File(result.files.single.path!);
-      final uploader = SPUploadBloc(
-          PifsClientProvider.of(context).client,
-          PifsClientProvider.of(context).uploader
-      );
-      BlocProvider.of<SPUploadList>(context).add(SPUploadListAdd(uploader));
+      final manager = BlocProvider.of<SPUploadManager>(context);
+      final uploader = SPUploadBloc(manager);
+      manager.add(SPUploadListAdd(uploader));
       uploader.add(SPUploadBlocBegin(file.path));
     } else {
       // User canceled the picker

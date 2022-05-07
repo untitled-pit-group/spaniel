@@ -21,6 +21,9 @@ abstract class PifsClient {
   /// Request the server to clean up any state associated with this file, including deleting any partial uploaded data from GCS.
   PifsResponse<PifsNullResponse> uploadCancel(PifsUploadsCancelParameters params);
 
+  /// List all in-progress uploads.
+  PifsResponse<List<PifsUpload>> uploadsList();
+
   /// List all uploaded files.
   PifsResponse<List<PifsFile>> filesList();
 

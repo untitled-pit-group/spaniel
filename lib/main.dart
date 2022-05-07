@@ -49,8 +49,11 @@ class SpanielApp extends StatelessWidget {
               BlocProvider<SPSearchBloc>(
                 create: (_) => SPSearchBloc(client: client),
               ),
-              BlocProvider<SPUploadList>(
-                create: (_) => SPUploadList(client: client)..add(SPUploadListReload()),
+              BlocProvider<SPUploadManager>(
+                create: (_) => SPUploadManager(
+                  client: client,
+                  uploader: PifsClientProvider.of(context).uploader
+                )..add(SPUploadListReload()),
               )
             ], child: const SPHome());
           }

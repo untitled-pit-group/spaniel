@@ -23,10 +23,30 @@ class SPUploadCard extends StatelessWidget {
       return const Icon(Icons.mood_bad);
     }
 
+    final buttons = _getButtons(context, state);
+
     return Column(
       children: [
         Text(u.name),
         Text(u.hash),
+        if(buttons != null) buttons,
+      ],
+    );
+  }
+
+  Widget? _getButtons(BuildContext context, SPUploadBlocState state) {
+    if(state.isBusy) return null;
+    if(state.upload == null) return null;
+    return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        TextButton(
+          onPressed: () => upload.add(SPUploadBlocCancel()),
+          child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [Icon(Icons.close), Text("Cancel")]
+          )
+        )
       ],
     );
   }

@@ -12,6 +12,7 @@ import 'package:spaniel/pifs/client.dart';
 import 'package:spaniel/pifs/data/upload.dart';
 import 'package:spaniel/pifs/parameters/parameters.dart';
 import 'package:spaniel/pifs/upload/uploader.dart';
+import 'package:spaniel/spaniel/bloc/upload_list.dart';
 
 abstract class SPUploadBlocEvent {}
 
@@ -69,10 +70,9 @@ class SPUploadBlocState with EquatableMixin {
 }
 
 class SPUploadBloc extends Bloc<SPUploadBlocEvent, SPUploadBlocState> {
-  final PifsClient client;
-  final PifsUploader uploader;
+  final SPUploadManager manager;
 
-  SPUploadBloc(this.client, this.uploader, {PifsUpload? upload}) : super(SPUploadBlocState.initial(upload)) {
+  SPUploadBloc(this.manager, {PifsUpload? upload}) : super(SPUploadBlocState.initial(upload)) {
     on<SPUploadBlocBegin>(_onUploadBegin);
     on<_SPUploadBlocUpload>(_onUploadUpload);
     on<SPUploadBlocCancel>(_onUploadCancel);
@@ -88,7 +88,7 @@ class SPUploadBloc extends Bloc<SPUploadBlocEvent, SPUploadBlocState> {
     final chunks = file.openRead().map((x) => x as Uint8List);
 
     final hashOutput = AccumulatorSink<Digest>();
-    final hashInput = sha1.startChunkedConversion(hashOutput);
+    final hashInput = sha256.startChunkedConversion(hashOutput);
     await chunks.forEach((e) { hashInput.add(e); });
     hashInput.close();
     
@@ -107,7 +107,7 @@ class SPUploadBloc extends Bloc<SPUploadBlocEvent, SPUploadBlocState> {
     final fileName = p.basename(path);
 
     final parameters = PifsUploadsBeginParameters(hashDigest, fileSize, fileName);
-    final response = await client.uploadBegin(parameters);
+    final response = await manager.client.uploadBegin(parameters);
 
     response.fold(
       (upload) {
@@ -142,7 +142,7 @@ class SPUploadBloc extends Bloc<SPUploadBlocEvent, SPUploadBlocState> {
     emit(state.apply(isBusy: const Some(true)));
 
     final parameters = PifsUploadsCancelParameters(id);
-    final response = await client.uploadCancel(parameters);
+    final response = await manager.client.uploadCancel(parameters);
 
     response.fold(
       (succ) {
@@ -150,6 +150,7 @@ class SPUploadBloc extends Bloc<SPUploadBlocEvent, SPUploadBlocState> {
           isBusy: const Some(false),
           upload: const Some(null)
         ));
+        manager.add(SPUploadListRemove(this));
       },
       (error) {
         print("There was an error cancelling the upload: $error");

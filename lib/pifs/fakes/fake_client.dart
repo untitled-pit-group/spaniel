@@ -43,4 +43,9 @@ class PifsFakeClient implements PifsClient {
   PifsResponse<List<PifsSearchResult>> searchPerform(PifsSearchPerformParameters params) {
     throw UnimplementedError();
   }
+
+  @override
+  PifsResponse<List<PifsUpload>> uploadsList() {
+    throw UnimplementedError();
+  }
 }

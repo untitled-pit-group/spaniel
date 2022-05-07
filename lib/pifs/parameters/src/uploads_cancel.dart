@@ -8,6 +8,6 @@ class PifsUploadsCancelParameters implements Jsonable {
 
   @override
   dynamic toJson() {
-    return {"id": id.raw};
+    return {"upload_id": id.raw};
   }
 }

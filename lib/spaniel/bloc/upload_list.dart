@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:spaniel/pifs/client.dart';
+import 'package:spaniel/pifs/upload/uploader.dart';
 import 'package:spaniel/spaniel/bloc/upload.dart';
 
 abstract class SPUploadListEvent {}
@@ -76,11 +77,13 @@ class SPUploadListState with EquatableMixin {
   @override List<Object?> get props => [isBusy, stateIdx, uploads];
 }
 
-class SPUploadList extends Bloc<SPUploadListEvent, SPUploadListState> {
+class SPUploadManager extends Bloc<SPUploadListEvent, SPUploadListState> {
   final PifsClient client;
+  final PifsUploader uploader;
 
-  SPUploadList({
-    required this.client
+  SPUploadManager({
+    required this.client,
+    required this.uploader
   }) : super(SPUploadListState.initial()) {
     on<SPUploadListReload>(_onReloadUploads);
     on<SPUploadListAdd>(_onAddUpload);
@@ -89,11 +92,16 @@ class SPUploadList extends Bloc<SPUploadListEvent, SPUploadListState> {
 
   Future<void> _onReloadUploads(SPUploadListReload event, Emitter emit) async {
     emit(state.withBusy(true));
-    // TODO: Implement uploads.list endpoint
-    await Future.delayed(const Duration(milliseconds: 500));
     // We only call this on app launch for now, therefore we don't have to be
     // careful with accidentally removing stuff that hasn't synced with FX
-    emit(state.withBusy(false));
+    final response = await client.uploadsList();
+    response.fold(
+      (uploads) => emit(state
+          .withBusy(false)
+          .withUploads(uploads.map((e) => SPUploadBloc(this, upload: e)).toList())
+      ),
+      (error) => emit(state.withBusy(false))
+    );
   }
 
   Future<void> _onAddUpload(SPUploadListAdd event, Emitter emit) async {
