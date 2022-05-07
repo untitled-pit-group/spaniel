@@ -25,8 +25,6 @@ class PifsUploadsFinishParameters implements Jsonable {
 
   @override
   toJson() {
-    print("relevance_timestamp: ${relevanceTimestamp?.asFoxhoundString()}");
-
     return <String, dynamic>{
       "upload_id": uploadId.raw,
       "name": name,
