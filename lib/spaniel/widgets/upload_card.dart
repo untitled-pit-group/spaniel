@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spaniel/pifs/upload/uploader.dart';
 import 'package:spaniel/spaniel/bloc/upload.dart';
 
 class SPUploadCard extends StatelessWidget {
@@ -24,13 +25,29 @@ class SPUploadCard extends StatelessWidget {
     }
 
     final buttons = _getButtons(context, state);
+    final progressBar = _getProgressBar(context, state);
 
     return Column(
       children: [
+        if(progressBar != null) progressBar,
         Text(u.name),
         Text(u.hash),
         if(buttons != null) buttons,
       ],
+    );
+  }
+
+  Widget? _getProgressBar(BuildContext context, SPUploadBlocState state) {
+    if(state.task == null) return null;
+    return StreamBuilder<PifsUploadCheckpoint>(
+      stream: state.task!.progress,
+      builder: (context, snap) {
+        if(snap.hasData == false) {
+          return const LinearProgressIndicator();
+        } else {
+          return LinearProgressIndicator(value: snap.requireData.progress);
+        }
+      }
     );
   }
 

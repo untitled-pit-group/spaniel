@@ -31,12 +31,14 @@ class SPUploadBlocState with EquatableMixin {
   // Using the state variables, one should be able to figure out whether
   // this upload is initiated locally or is a remote response to uploads in progress
   final bool isBusy;
+  final bool isUploaded;
   final String? filePath;
   final PifsUpload? upload;
   final PifsUploadTask? task;
 
   const SPUploadBlocState._internal({
     required this.isBusy,
+    required this.isUploaded,
     required this.filePath,
     required this.upload,
     required this.task
@@ -45,6 +47,7 @@ class SPUploadBlocState with EquatableMixin {
   factory SPUploadBlocState.initial(PifsUpload? upload) {
     return SPUploadBlocState._internal(
       isBusy: false,
+      isUploaded: false,
       filePath: null,
       upload: upload,
       task: null
@@ -53,12 +56,14 @@ class SPUploadBlocState with EquatableMixin {
 
   SPUploadBlocState apply({
     Option<bool> isBusy = const None(),
+    Option<bool> isFinished = const None(),
     Option<String?> filePath = const None(),
     Option<PifsUpload?> upload = const None(),
     Option<PifsUploadTask?> task = const None(),
   }) {
     return SPUploadBlocState._internal(
       isBusy: isBusy.fold(() => this.isBusy, (a) => a),
+      isUploaded: isBusy.fold(() => this.isUploaded, (a) => a),
       filePath: filePath.fold(() => this.filePath, (a) => a),
       upload: upload.fold(() => this.upload, (a) => a),
       task: task.fold(() => this.task, (a) => a),
@@ -66,7 +71,7 @@ class SPUploadBlocState with EquatableMixin {
   }
 
   @override
-  List<Object?> get props => [isBusy, filePath, upload, task];
+  List<Object?> get props => [isBusy, isUploaded, filePath, upload, task];
 }
 
 class SPUploadBloc extends Bloc<SPUploadBlocEvent, SPUploadBlocState> {
@@ -117,6 +122,7 @@ class SPUploadBloc extends Bloc<SPUploadBlocEvent, SPUploadBlocState> {
           filePath: Some(path),
           upload: Some(upload)
         ));
+        add(_SPUploadBlocUpload());
       },
       (error) {
         print("There was an error beginning the upload: $error");
@@ -126,7 +132,38 @@ class SPUploadBloc extends Bloc<SPUploadBlocEvent, SPUploadBlocState> {
   }
 
   Future<void> _onUploadUpload(_SPUploadBlocUpload event, Emitter emit) async {
-    throw UnimplementedError();
+    final path = state.filePath;
+    Uri? target;
+    if(state.upload is PifsTargetableUpload) {
+      target = (state.upload as PifsTargetableUpload).uploadUrl;
+    }
+    if(path == null) return;
+    if(target == null) return;
+
+    final file = File(path);
+    final chunks = file.openRead().map((x) => x as Uint8List);
+
+    final task = manager.uploader.start(
+        chunkSource: chunks,
+        length: await file.length(),
+        target: target
+    );
+
+    emit(state.apply(task: Some(task)));
+
+    /// Will throw if an error occurs
+    try {
+      await task.complete;
+      emit(state.apply(
+        isFinished: const Some(true),
+        task: const Some(null),
+      ));
+      add(_SPUploadBlocFinish());
+    } catch (e) {
+      print("File upload failed with error $e");
+      emit(state.apply(task: const Some(null)));
+      add(SPUploadBlocCancel());
+    }
   }
 
   Future<void> _onUploadCancel(SPUploadBlocCancel event, Emitter emit) async {
@@ -140,6 +177,14 @@ class SPUploadBloc extends Bloc<SPUploadBlocEvent, SPUploadBlocState> {
     }
 
     emit(state.apply(isBusy: const Some(true)));
+
+    if(state.task != null) {
+      // If this is called during an active upload, we must cancel the upload task first.
+      // Upon cancellation, this will be called again by the [_onUploadUpload] handler.
+      final t = state.task;
+      t?.cancel();
+      return;
+    }
 
     final parameters = PifsUploadsCancelParameters(id);
     final response = await manager.client.uploadCancel(parameters);
@@ -160,6 +205,29 @@ class SPUploadBloc extends Bloc<SPUploadBlocEvent, SPUploadBlocState> {
   }
 
   Future<void> _onUploadFinish(_SPUploadBlocFinish event, Emitter emit) async {
-    throw UnimplementedError();
+    final id = state.upload?.id;
+    if(id == null && state.isUploaded == true) {
+      // Upload is not finishable
+      return;
+    }
+
+    final parameters = PifsUploadsFinishParameters(
+      uploadId: id!,
+      name: "Non-unique name",
+      tags: ["baba", "booey"],
+      relevanceTimestamp: DateTime.now()
+    );
+    final response = await manager.client.uploadFinish(parameters);
+
+    response.fold(
+      (file) {
+        print("Upload successfully finished, got file: ${file.id}");
+        manager.add(SPUploadListRemove(this));
+      },
+      (error) {
+        print("There was an error finishing the upload: $error");
+        emit(state.apply(isBusy: const Some(false)));
+      }
+    );
   }
 }

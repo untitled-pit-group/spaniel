@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import "package:spaniel/pifs/support/json.dart";
 import 'package:spaniel/pifs/util/dartz.dart';
+import 'package:spaniel/pifs/util/timestamp.dart';
 
 class PifsFilesEditParameters implements Jsonable {
   /// The file ID.
@@ -29,7 +30,7 @@ class PifsFilesEditParameters implements Jsonable {
       if (name is Some) "name": name.unwrapped,
       if (tags is Some) "tags": tags.unwrapped.toList(growable: false),
       if (relevanceTimestamp is Some)
-        "relevance_timestamp": relevanceTimestamp.unwrapped?.toIso8601String(),
+        "relevance_timestamp": relevanceTimestamp.unwrapped?.asFoxhoundString(),
     };
   }
 }

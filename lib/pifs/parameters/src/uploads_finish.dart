@@ -1,5 +1,6 @@
 import "package:spaniel/pifs/data/upload.dart";
 import "package:spaniel/pifs/support/json.dart";
+import 'package:spaniel/pifs/util/timestamp.dart';
 
 class PifsUploadsFinishParameters implements Jsonable {
   /// The upload ID, as returned by uploads.begin.
@@ -24,11 +25,13 @@ class PifsUploadsFinishParameters implements Jsonable {
 
   @override
   toJson() {
+    print("relevance_timestamp: ${relevanceTimestamp?.asFoxhoundString()}");
+
     return <String, dynamic>{
       "upload_id": uploadId.raw,
       "name": name,
       "tags": tags,
-      "relevance_timestamp": relevanceTimestamp?.toIso8601String(),
+      "relevance_timestamp": relevanceTimestamp?.asFoxhoundString(),
     };
   } 
 }
