@@ -35,6 +35,8 @@ dependencies:
   bloc_test: ^9.0.3
   intl: ^0.17.0
   flutter_search_bar: ^3.0.0-dev.1
+  file_picker: ^4.5.1
+  flash: ^2.0.3+2
 
 dev_dependencies:
   flutter_test:

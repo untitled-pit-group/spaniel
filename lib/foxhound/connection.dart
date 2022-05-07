@@ -38,7 +38,13 @@ class _FXConnectionSink implements StreamSink<String> {
 class FXConnectionError extends Error {
   final http.Response response;
   FXConnectionError(this.response);
+
+  @override
+  String toString() {
+    return 'FXConnectionError ${response.statusCode}: ${response.body}';
+  }
 }
+
 class FXConnection with StreamChannelMixin<String> implements StreamChannel<String> {
   final _stream = StreamController<String>();
   late final _FXConnectionSink _sink;

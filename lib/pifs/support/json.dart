@@ -21,7 +21,7 @@ class JsonRepresentationException implements Exception {
 
   @override
   String toString() => "Invalid JSON representation received from server" +
-    (key == null ? " (at $key)" : "");
+    (key != null ? " (at $key)" : "");
 }
 typedef _JRE = JsonRepresentationException;
 

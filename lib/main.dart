@@ -4,6 +4,8 @@ import "package:spaniel/generated/l10n.dart";
 import 'package:spaniel/pifs/fakes/offline_client.dart';
 import 'package:spaniel/spaniel/bloc/file_list.dart';
 import 'package:spaniel/spaniel/bloc/search.dart';
+import 'package:spaniel/spaniel/bloc/upload.dart';
+import 'package:spaniel/spaniel/bloc/upload_list.dart';
 import "package:spaniel/spaniel/screens/home.dart";
 import "package:flutter_localizations/flutter_localizations.dart";
 import "package:spaniel/pifs/support/flutter.dart";
@@ -30,7 +32,7 @@ class SpanielApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: S.delegate.supportedLocales,
-      home: PifsMockClientConnector(child: Builder(
+      home: PifsFoxhoundClientConnector(child: Builder(
         builder: (context) {
           final client = PifsClientProvider.of(context).client;
           if(client is PifsIndeterminateClient) {
@@ -47,6 +49,9 @@ class SpanielApp extends StatelessWidget {
               BlocProvider<SPSearchBloc>(
                 create: (_) => SPSearchBloc(client: client),
               ),
+              BlocProvider<SPUploadList>(
+                create: (_) => SPUploadList(client: client)..add(SPUploadListReload()),
+              )
             ], child: const SPHome());
           }
         }

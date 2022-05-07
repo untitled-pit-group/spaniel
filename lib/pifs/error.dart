@@ -55,6 +55,11 @@ class PifsError {
     final readableCode = _readableCodes[code];
     return _PE._(code, readableCode ?? "unknown");
   }
+
+  @override
+  String toString() {
+    return 'PifsError{readableCode: $readableCode, code: $code, serverMessage: $serverMessage, data: $data}';
+  }
 }
 
 /// A representation of an exception that happened within the server. This can
@@ -92,5 +97,10 @@ class PifsRemoteError extends PifsError {
       remoteLocation: location,
       remoteTrace: trace,
     );
+  }
+
+  @override
+  String toString() {
+    return 'PifsRemoteError{remoteClass: $remoteClass, remoteMessage: $remoteMessage, remoteLocation: $remoteLocation, remoteTrace: $remoteTrace}';
   }
 }

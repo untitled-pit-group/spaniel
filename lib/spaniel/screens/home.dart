@@ -1,10 +1,17 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spaniel/pifs/support/flutter.dart';
 import 'package:spaniel/spaniel/bloc/file_list.dart';
 import 'package:spaniel/spaniel/bloc/search.dart';
+import 'package:spaniel/spaniel/bloc/upload.dart';
+import 'package:spaniel/spaniel/bloc/upload_list.dart';
 import 'package:spaniel/spaniel/widgets/file_card.dart';
 import 'package:spaniel/spaniel/widgets/search_result_card.dart';
 import 'package:flutter_search_bar/flutter_search_bar.dart';
+import 'package:spaniel/spaniel/widgets/upload_card.dart';
 
 class SPHome extends StatefulWidget {
   const SPHome({Key? key}) : super(key: key);
@@ -98,8 +105,41 @@ class _SPHomeState extends State<SPHome> {
     }
   }
 
+  Widget _getUploads(BuildContext context) {
+    return BlocBuilder<SPUploadList, SPUploadListState>(
+      builder: (context, state) {
+        return Column(
+          children: [
+            ...state.uploads.map((e) => SPUploadCard(upload: e))
+          ],
+        );
+      }
+    );
+  }
+
   Widget _getBody(BuildContext context) {
-    return _getContents(context);
+    return Column(
+      children: [
+        _getUploads(context),
+        Expanded(child: _getContents(context)),
+      ],
+    );
+  }
+
+  Future<void> _onUpload(BuildContext context) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    if (result != null) {
+      File file = File(result.files.single.path!);
+      final uploader = SPUploadBloc(
+          PifsClientProvider.of(context).client,
+          PifsClientProvider.of(context).uploader
+      );
+      BlocProvider.of<SPUploadList>(context).add(SPUploadListAdd(uploader));
+      uploader.add(SPUploadBlocBegin(file.path));
+    } else {
+      // User canceled the picker
+    }
   }
 
   @override
@@ -107,6 +147,10 @@ class _SPHomeState extends State<SPHome> {
     return Scaffold(
       appBar: searchBar.build(context),
       body: _getBody(context),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.upload),
+        onPressed: () => _onUpload(context),
+      ),
     );
   }
 }

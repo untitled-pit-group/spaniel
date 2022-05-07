@@ -1,11 +1,9 @@
 class Config {
   /// The Foxhound endpoint to refer to.
-  /// 
-  /// TODO[pn]: This should probably be configurable and not hardcoded.
-  static const fxEndpoint = "http://foxhound.localhost";
+  /// The value is taken from a FX_ENDPOINT variable passed to --dart-define
+  static const fxEndpoint = String.fromEnvironment("FX_ENDPOINT", defaultValue: "http://foxhound.localhost");
   
   /// The secret key used by Foxhound.
-  /// 
-  /// TODO[pn]: This should probably be configurable and not hardcoded.
-  static const fxSecretKey = "hackme";
+  /// The value is taken from a FX_KEY variable passed to --dart-define
+  static const fxSecretKey = String.fromEnvironment("FX_KEY", defaultValue: "hackme");
 }

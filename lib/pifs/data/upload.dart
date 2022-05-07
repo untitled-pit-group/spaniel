@@ -23,7 +23,7 @@ class PifsUpload {
       return PifsUpload(
         id: PifsUploadId(j.v("id")),
         hash: j.v("hash"),
-        progress: j.v("progress"),
+        progress: j.v<num>("progress").toDouble(),
         name: j.v("name"),
       );
     } else {
@@ -48,7 +48,7 @@ class PifsTargetableUpload extends PifsUpload {
       return PifsTargetableUpload(
         id: PifsUploadId(j.v("id")),
         hash: j.v("hash"),
-        progress: j.v("progress"),
+        progress: j.v<num>("progress").toDouble(),
         name: j.v("name"),
         uploadUrl: j.vt("gcs_url", Uri.tryParse),
       );

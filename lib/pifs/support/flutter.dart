@@ -1,6 +1,7 @@
 import "dart:async";
 import "package:flutter/material.dart";
 import "package:spaniel/foxhound/client.dart";
+import 'package:spaniel/foxhound/connection.dart';
 import "package:spaniel/pifs/client.dart";
 import "package:spaniel/pifs/fakes/mock_client.dart";
 import "package:spaniel/pifs/fakes/offline_client.dart";
@@ -43,12 +44,15 @@ class _PifsClientConnectorState extends State<PifsFoxhoundClientConnector> {
         this.client = client;
         completer.complete(client);
       });
-    } on Error {
+    } catch(e) {
       // TODO[pn]: This should probably be a bit more conditional than this
       // TODO[pn]: Connection should be retried on an interval *and* upon detecting any connectivity state changes
       setState(() {
-        // TODO[pn]: [PifsOfflineReason.badSecret] should be detected
-        client = const PifsOfflineClient(PifsOfflineReason.networkConnection);
+        if(e is FXConnectionError && e.response.statusCode == 401) {
+          client = const PifsOfflineClient(PifsOfflineReason.badSecret);
+        } else {
+          client = const PifsOfflineClient(PifsOfflineReason.networkConnection);
+        }
         completer.complete(client);
       });
     }
