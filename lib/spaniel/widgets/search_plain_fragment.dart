@@ -35,24 +35,28 @@ class SPSearchPlainFragment extends StatelessWidget {
 
     final strs = List<Tuple2<String, bool>>.empty(growable: true);
 
-    for (int i = 0; i < ranges.length; i++) {
-      int baseStart = 0;
-      int baseEnd = 0;
-      int hlStart = ranges[i].start;
-      int hlEnd = ranges[i].end+1;
+    if(ranges.isNotEmpty) {
+      for (int i = 0; i < ranges.length; i++) {
+        int baseStart = 0;
+        int baseEnd = 0;
+        int hlStart = ranges[i].start;
+        int hlEnd = ranges[i].end+1;
 
-      if(i == 0) {
-        baseEnd = ranges[0].start;
-      } else {
-        baseStart = ranges[i-1].end+1;
-        baseEnd = ranges[i].start;
+        if(i == 0) {
+          baseEnd = ranges[0].start;
+        } else {
+          baseStart = ranges[i-1].end+1;
+          baseEnd = ranges[i].start;
+        }
+
+        strs.add(Tuple2(f.substring(baseStart, baseEnd), false));
+        strs.add(Tuple2(f.substring(hlStart, hlEnd), true));
       }
 
-      strs.add(Tuple2(f.substring(baseStart, baseEnd), false));
-      strs.add(Tuple2(f.substring(hlStart, hlEnd), true));
+      strs.add(Tuple2(f.substring(ranges.last.end+1), false));
+    } else {
+      strs.add(Tuple2(f, false));
     }
-
-    strs.add(Tuple2(f.substring(ranges.last.end+1), false));
 
     return Text.rich(TextSpan(
       style: const TextStyle(fontSize: 16),
