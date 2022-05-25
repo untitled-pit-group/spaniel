@@ -8,8 +8,8 @@ import 'package:spaniel/spaniel/visual/datetime_formatter.dart';
 class SPFileExtendedFragment extends StatelessWidget {
   final SPFileBloc file;
   final Function() onDownload;
-  final Function() onEdit;
-  final Function() onDelete;
+  final Function()? onEdit;
+  final Function()? onDelete;
   final bool isExpanded;
   final bool isEditing;
 
@@ -157,14 +157,14 @@ class SPFileExtendedFragment extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [Icon(Icons.download), Text("Download")]
                     ))),
-            Expanded(
+            if (onEdit != null) Expanded(
                 child: TextButton(
                     onPressed: onEdit,
                     child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [Icon(Icons.edit), Text("Edit")]
                     ))),
-            Expanded(
+            if (onDelete != null) Expanded(
                 child: TextButton(
                     onPressed: onDelete,
                     child: Row(
@@ -222,21 +222,21 @@ class SPFileExtendedFragment extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            if (isSaveable) Expanded(
+            if (isSaveable && onEdit != null) Expanded(
                 child: TextButton(
                     onPressed: () {
                       file.add(SPFileBlocSaveChanges());
-                      onEdit();
+                      onEdit!();
                     },
                     child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [Icon(Icons.done), Text("Save")]
                     ))),
-            Expanded(
+            if (onEdit != null) Expanded(
                 child: TextButton(
                     onPressed: () {
                       if(isSaveable) file.add(SPFileBlocRevertChanges());
-                      onEdit();
+                      onEdit!();
                     },
                     child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,

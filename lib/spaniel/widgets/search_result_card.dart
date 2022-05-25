@@ -3,6 +3,7 @@ import 'package:spaniel/pifs/client.dart';
 import 'package:spaniel/pifs/data/search_result.dart';
 import 'package:spaniel/pifs/parameters/src/files_get.dart';
 import 'package:spaniel/spaniel/bloc/file.dart';
+import 'package:spaniel/spaniel/widgets/file_extended_fragment.dart';
 import 'package:spaniel/spaniel/widgets/search_plain_fragment.dart';
 
 class SPSearchResultCard extends StatefulWidget {
@@ -27,6 +28,17 @@ class _SPSearchResultCardState extends State<SPSearchResultCard> {
   void initState() {
     super.initState();
     _refreshFile();
+  }
+
+  Widget _getExpandedContents(BuildContext context) {
+    if(file == null) return const SizedBox.shrink();
+    return SPFileExtendedFragment(
+      file: file!,
+      onDownload: () => file!.add(SPFileBlocDownload()),
+      onEdit: null,
+      onDelete: null,
+      isExpanded: true
+    );
   }
 
   void _refreshFile() async {
@@ -70,7 +82,14 @@ class _SPSearchResultCardState extends State<SPSearchResultCard> {
             alignment: Alignment.topCenter,
             duration: const Duration(milliseconds: 350),
             curve: Curves.easeInOutCubicEmphasized,
-            child: _getCardContents(context)
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _getCardContents(context),
+                if (isExpanded) const Divider(),
+                if (isExpanded) _getExpandedContents(context)
+              ],
+            )
           )
         ),
       ),

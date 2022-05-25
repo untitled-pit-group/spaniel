@@ -30,6 +30,7 @@ class _SPHomeState extends State<SPHome> {
   }
 
   late final SearchBar searchBar;
+  String lastQuery = "";
   final TextEditingController searchBoxController = TextEditingController();
 
   bool inSearch = false;
@@ -48,8 +49,9 @@ class _SPHomeState extends State<SPHome> {
     searchBoxController.addListener(() {
       setState(() {
         // TODO: Throttling (can also be done in bloc side with an event transformer)
-        if(searchBoxController.text.isNotEmpty) {
+        if(searchBoxController.text.isNotEmpty && lastQuery != searchBoxController.text) {
           BlocProvider.of<SPSearchBloc>(context).add(SPSearchSearchEvent(searchBoxController.text));
+          lastQuery = searchBoxController.text;
         }
         inSearch = searchBoxController.text.isNotEmpty;
       });
@@ -64,6 +66,14 @@ class _SPHomeState extends State<SPHome> {
 
   Widget _getMainList(BuildContext context) {
     return BlocBuilder<SPUploadManager, SPUploadListState>(
+      buildWhen: (previous, current) {
+        if(previous.stateIdx != current.stateIdx && current.uploads.isEmpty) {
+          Future.delayed(const Duration(seconds: 1)).then((_) {
+            BlocProvider.of<SPFileList>(context).add(SPFileListReload());
+          });
+        }
+        return true;
+      },
       builder: (context, uploadState) => BlocBuilder<SPFileList, SPFileListState>(
         builder: (context, fileState) {
           if(fileState.isBusy) {

@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:bloc_event_transformers/bloc_event_transformers.dart';
 import 'package:equatable/equatable.dart';
 import 'package:spaniel/pifs/client.dart';
 import 'package:spaniel/pifs/data/search_result.dart';
@@ -51,7 +52,7 @@ class SPSearchBloc extends Bloc<SPSearchEvent, SPSearchState> {
   SPSearchBloc({
     required this.client
   }) : super(SPSearchState.initial()) {
-    on<SPSearchSearchEvent>(_onSearch);
+    on<SPSearchSearchEvent>(_onSearch, transformer: debounce(const Duration(milliseconds: 350)));
   }
 
   Future<void> _onSearch(SPSearchSearchEvent event, Emitter emit) async {
