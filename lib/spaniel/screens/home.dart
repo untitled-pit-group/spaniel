@@ -1,6 +1,7 @@
 import 'dart:io';
-
+import 'package:dartz/dartz.dart' show Left, Right;
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spaniel/pifs/support/flutter.dart';
@@ -126,14 +127,30 @@ class _SPHomeState extends State<SPHome> {
   }
 
   Future<void> _onUpload(BuildContext context) async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      allowMultiple: false,
+      withData: false,
+      withReadStream: kIsWeb
+    );
 
     if (result != null) {
-      File file = File(result.files.single.path!);
+      final file = result.files.single;
       final manager = BlocProvider.of<SPUploadManager>(context);
       final uploader = SPUploadBloc(manager);
       manager.add(SPUploadListAdd(uploader));
-      uploader.add(SPUploadBlocBegin(file.path));
+      if(kIsWeb) {
+        uploader.add(SPUploadBlocBegin(
+          fileName: file.name,
+          fileLength: file.size,
+          pathOrStream: Right(file.readStream!)
+        ));
+      } else {
+        uploader.add(SPUploadBlocBegin(
+          fileName: file.name,
+          fileLength: file.size,
+          pathOrStream: Left(file.path!)
+        ));
+      }
     } else {
       // User canceled the picker
     }

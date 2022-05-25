@@ -20,5 +20,5 @@ linter:
 
 analyzer:
   errors:
-    avoid_print: error
+    avoid_print: warning
     implementation_imports: error
