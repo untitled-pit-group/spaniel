@@ -24,7 +24,7 @@ class SPHome extends StatefulWidget {
 class _SPHomeState extends State<SPHome> {
   AppBar buildAppBar(BuildContext context) {
     return AppBar(
-        title: Text('home_title'),
+        title: Text('Pretty Insane File Search'),
         actions: [searchBar.getSearchAction(context)]
     );
   }
@@ -95,9 +95,9 @@ class _SPHomeState extends State<SPHome> {
 
           return ListView(
               children: [
-                if(uploadWidgets.isNotEmpty) Text("active_uploads", style: Theme.of(context).textTheme.headlineLarge),
+                if(uploadWidgets.isNotEmpty) Text("Ongoing uploads", style: Theme.of(context).textTheme.headlineLarge),
                 ...uploadWidgets,
-                Text("my_files", style: Theme.of(context).textTheme.headlineLarge),
+                Text("Your files", style: Theme.of(context).textTheme.headlineLarge),
                 ...fileWidgets
               ]
           );
@@ -112,9 +112,24 @@ class _SPHomeState extends State<SPHome> {
         if(state.isBusy) {
           return const Center(child: CircularProgressIndicator());
         }
+        if(state.results.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset("assets/rover_think.png", width: 100, fit: BoxFit.fitWidth,),
+                const SizedBox(height: 12),
+                Text("Looks like we couldn't find anything...", style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white30
+                ))
+              ],
+            ),
+          );
+        }
         return ListView(
           children: [
-            Text("search_results", style: Theme.of(context).textTheme.headlineLarge),
+            Text("Search results", style: Theme.of(context).textTheme.headlineLarge),
             // Key is required for Flutter to not do weirdness and give
             // the state of the current widget to a different one
             ...state.results.map((e) => SPSearchResultCard(

@@ -21,7 +21,8 @@ class SpanielApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "app_title",
+      debugShowCheckedModeBanner: false,
+      title: "Pretty Insane File Search",
       theme: ThemeData(
         primarySwatch: Colors.orange,
         brightness: Brightness.dark
