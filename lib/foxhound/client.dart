@@ -103,6 +103,11 @@ class FoxhoundClient implements PifsClient {
   }
 
   @override
+  PifsResponse<PifsStringResponse> filesRequestDownload(PifsFilesRequestDownloadParameters params) {
+    return _send("files.request_download", params, PifsStringResponse.fromJson);
+  }
+
+  @override
   PifsResponse<List<PifsFile>> filesList() {
     return _send("files.list", _EmptyParameters.instance,
       const _ListBuilder(PifsFile.fromJson).fromJson);

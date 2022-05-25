@@ -1,5 +1,7 @@
+import 'dart:html' as html;
 import "package:bloc/bloc.dart";
 import "package:equatable/equatable.dart";
+import 'package:flutter/foundation.dart';
 import "package:spaniel/pifs/client.dart";
 import "package:spaniel/pifs/data/file.dart";
 import "package:spaniel/pifs/data/src/file_staged_metadata.dart";
@@ -119,8 +121,23 @@ class SPFileBloc extends Bloc<SPFileBlocEvent, SPFileBlocState> {
   }
 
   Future<void> _onDownload(SPFileBlocDownload event, Emitter emit) async {
-    /// TODO: Don't touch this until we know how the download from will work
-    throw UnimplementedError();
+    if(!kIsWeb) {
+      print("Nah, no downloads on Android/iOS yet");
+    }
+
+    final f = state.file;
+    if(f == null) {
+      // This is a weird, uncomfortable error condition. Just do nothing.
+      return;
+    }
+
+    final url = await client.filesRequestDownload(PifsFilesRequestDownloadParameters(f.id));
+    url.fold(
+      (response) {
+        html.window.open(response.response, 'File', "popup=1");
+      },
+      (error) => print("An error occurred when downloading file: ${error.readableCode}, ${error.serverMessage}")
+    );
   }
 
   Future<void> _onDelete(SPFileBlocDelete event, Emitter emit) async {

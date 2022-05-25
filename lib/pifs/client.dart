@@ -31,6 +31,8 @@ abstract class PifsClient {
 
   PifsResponse<PifsNullResponse> filesDelete(PifsFilesDeleteParameters params);
 
+  PifsResponse<PifsStringResponse> filesRequestDownload(PifsFilesRequestDownloadParameters params);
+
   /// Change the user-editable metadata of a file.
   PifsResponse<PifsFile> filesEdit(PifsFilesEditParameters params);
 
