@@ -93,13 +93,15 @@ class _SPHomeState extends State<SPHome> {
           Iterable<Widget> uploadWidgets = uploadState.uploads.map((e) => SPUploadCard(upload: e,
               key: e.state.upload?.id != null ? Key(e.state.upload!.id.raw) : null));
 
+          // FIXME: Listviews with stateful widgets == stupid idea
           return ListView(
-              children: [
-                if(uploadWidgets.isNotEmpty) Text("Ongoing uploads", style: Theme.of(context).textTheme.headlineLarge),
-                ...uploadWidgets,
-                Text("Your files", style: Theme.of(context).textTheme.headlineLarge),
-                ...fileWidgets
-              ]
+            cacheExtent: 2000,
+            children: [
+              if(uploadWidgets.isNotEmpty) Text("Ongoing uploads", style: Theme.of(context).textTheme.headlineLarge),
+              ...uploadWidgets,
+              Text("Your files", style: Theme.of(context).textTheme.headlineLarge),
+              ...fileWidgets
+            ]
           );
         }
       ),
@@ -127,7 +129,9 @@ class _SPHomeState extends State<SPHome> {
             ),
           );
         }
+        // FIXME: Listviews with stateful widgets == stupid idea
         return ListView(
+          cacheExtent: 2000,
           children: [
             Text("Search results", style: Theme.of(context).textTheme.headlineLarge),
             // Key is required for Flutter to not do weirdness and give
@@ -156,28 +160,29 @@ class _SPHomeState extends State<SPHome> {
 
   Future<void> _onUpload(BuildContext context) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
-      allowMultiple: false,
+      allowMultiple: true,
       withData: false,
       withReadStream: kIsWeb
     );
 
     if (result != null) {
-      final file = result.files.single;
       final manager = BlocProvider.of<SPUploadManager>(context);
-      final uploader = SPUploadBloc(manager);
-      manager.add(SPUploadListAdd(uploader));
-      if(kIsWeb) {
-        uploader.add(SPUploadBlocBegin(
-          fileName: file.name,
-          fileLength: file.size,
-          pathOrStream: Right(file.readStream!)
-        ));
-      } else {
-        uploader.add(SPUploadBlocBegin(
-          fileName: file.name,
-          fileLength: file.size,
-          pathOrStream: Left(file.path!)
-        ));
+      for (var file in result.files) {
+        final uploader = SPUploadBloc(manager);
+        manager.add(SPUploadListAdd(uploader));
+        if(kIsWeb) {
+          uploader.add(SPUploadBlocBegin(
+              fileName: file.name,
+              fileLength: file.size,
+              pathOrStream: Right(file.readStream!)
+          ));
+        } else {
+          uploader.add(SPUploadBlocBegin(
+              fileName: file.name,
+              fileLength: file.size,
+              pathOrStream: Left(file.path!)
+          ));
+        }
       }
     } else {
       // User canceled the picker
