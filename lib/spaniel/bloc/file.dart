@@ -124,9 +124,14 @@ class SPFileBloc extends Bloc<SPFileBlocEvent, SPFileBlocState> {
   }
 
   Future<void> _onDelete(SPFileBlocDelete event, Emitter emit) async {
-    /// TODO: Don't touch this until we can provide interface for delete
+    final f = state.file;
+    if(f == null) {
+      // This is a weird, uncomfortable error condition. Just do nothing.
+      return;
+    }
+
     emit(state.withBusy(true));
-    await Future.delayed(const Duration(milliseconds: 200));
+    await client.filesDelete(PifsFilesDeleteParameters(f.id));
     onDelete?.call(this);
     emit(state.withFile(null));
   }

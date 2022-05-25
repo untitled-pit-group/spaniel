@@ -48,4 +48,9 @@ class PifsFakeClient implements PifsClient {
   PifsResponse<List<PifsUpload>> uploadsList() {
     throw UnimplementedError();
   }
+
+  @override
+  PifsResponse<PifsNullResponse> filesDelete(PifsFilesDeleteParameters params) {
+    throw UnimplementedError();
+  }
 }

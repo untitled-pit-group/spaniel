@@ -98,6 +98,11 @@ class FoxhoundClient implements PifsClient {
   }
 
   @override
+  PifsResponse<PifsNullResponse> filesDelete(PifsFilesDeleteParameters params) {
+    return _send("files.delete", params, PifsNullResponse.fromJson);
+  }
+
+  @override
   PifsResponse<List<PifsFile>> filesList() {
     return _send("files.list", _EmptyParameters.instance,
       const _ListBuilder(PifsFile.fromJson).fromJson);

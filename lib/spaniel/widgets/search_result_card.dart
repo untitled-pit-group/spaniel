@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:spaniel/pifs/client.dart';
 import 'package:spaniel/pifs/data/search_result.dart';
+import 'package:spaniel/pifs/parameters/src/files_get.dart';
+import 'package:spaniel/spaniel/bloc/file.dart';
 import 'package:spaniel/spaniel/widgets/search_plain_fragment.dart';
 
 class SPSearchResultCard extends StatefulWidget {
   final PifsSearchResult result;
+  final PifsClient client;
 
   const SPSearchResultCard({
     Key? key,
-    required this.result
+    required this.result,
+    required this.client
   }) : super(key: key);
 
   @override
@@ -16,18 +21,40 @@ class SPSearchResultCard extends StatefulWidget {
 
 class _SPSearchResultCardState extends State<SPSearchResultCard> {
   bool isExpanded = false;
+  SPFileBloc? file;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshFile();
+  }
+
+  void _refreshFile() async {
+    final result = await widget.client.filesGet(PifsFilesGetParameters(widget.result.fileId));
+    if(!mounted) {
+      return;
+    }
+    result.fold(
+      (f) {
+          setState(() {
+            file = SPFileBloc(SPFileBlocState.initial(f), client: widget.client);
+          });
+        },
+      (e) => print("big bad $e")
+    );
+  }
 
   Widget _getCardContents(BuildContext context) {
     if(widget.result is PifsPlainSearchResult) {
-      return SPSearchPlainFragment(result: widget.result);
+      return SPSearchPlainFragment(result: widget.result, file: file);
     }
     if(widget.result is PifsDocumentSearchResult) {
-      return SPSearchPlainFragment(result: widget.result);
+      return SPSearchPlainFragment(result: widget.result, file: file);
     }
     if(widget.result is PifsMediaSearchResult) {
-      return SPSearchPlainFragment(result: widget.result);
+      return SPSearchPlainFragment(result: widget.result, file: file);
     }
-    return SPSearchPlainFragment(result: widget.result);
+    return SPSearchPlainFragment(result: widget.result, file: file);
   }
 
   @override

@@ -107,7 +107,10 @@ class _SPHomeState extends State<SPHome> {
             Text("search_results", style: Theme.of(context).textTheme.headlineLarge),
             // Key is required for Flutter to not do weirdness and give
             // the state of the current widget to a different one
-            ...state.results.map((e) => SPSearchResultCard(result: e))
+            ...state.results.map((e) => SPSearchResultCard(
+              result: e,
+              client: PifsClientProvider.of(context).client,
+            ))
           ]
         );
       }
