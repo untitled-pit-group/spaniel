@@ -21,3 +21,9 @@ A Flutter based frontend for PIFS
  * All **Foxhound** related classes, that is, those that provide interactivity with the Foxhound backend, must be prefixed by FX, and belong under the `foxhound` folder.
  * Objects relating to a shared data layer between the Spaniel and Foxhound modules belong in the `pifs` folder and must be prefixed with Pifs.
  * Miscellaneous classes that may be used by both Spaniel and Foxhound components are stored in an appropriate root level folder, and may not be prefixed.
+
+## License
+
+Insofar possible under the purview of authors' copyright and not contrary to
+other restrictions, the code in this repository is made available under the
+[0-clause BSD license.](./LICENSE)
